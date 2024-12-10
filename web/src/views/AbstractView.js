@@ -1,17 +1,15 @@
-export default class{
-    constructor(params) {
-        this.params = params;
-    }
+export default class {
+  constructor(params) {
+    this.params = params;
+  }
 
-    setTitle(title){
-        document.title = title;
-    }
+  setTitle(title) {
+    document.title = title;
+  }
 
-    async getHtml(){
-        return "";
-    }
+  async getHtml() {
+    return "";
+  }
 
-    async init() {
-        
-    }
+  async init() {}
 }

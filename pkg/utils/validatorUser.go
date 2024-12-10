@@ -2,10 +2,11 @@ package utils
 
 import (
 	"errors"
-	"forum/internal/entity"
 	"net/mail"
 	"regexp"
 	"unicode"
+
+	"forum/internal/entity"
 
 	"golang.org/x/crypto/bcrypt"
 )

@@ -1,0 +1,3 @@
+Search about why we should seperate sql quuery's in diferent files (migrations)
+Search about jwr secret (seed, hashing, crypto)
+What is the meaning of "Bearer"  in JWT token

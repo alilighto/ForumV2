@@ -2,11 +2,12 @@ package http1
 
 import (
 	"fmt"
+	"net/http"
+	"text/template"
+
 	"forum/internal/entity"
 	"forum/internal/service"
 	"forum/pkg/config"
-	"net/http"
-	"text/template"
 )
 
 type Handler struct {
