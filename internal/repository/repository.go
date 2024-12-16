@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
+
 	"forum/internal/entity"
 )
 
@@ -23,16 +24,18 @@ type Post interface {
 	CreatePost(ctx context.Context, input entity.Post) (uint, int, error)
 	DeletePostByID(ctx context.Context, PostID uint, userID uint) (int, error)
 	UpsertPostVote(ctx context.Context, input entity.PostVote) (int, error)
-	GetAllByTag(ctx context.Context, tagName string) ([]entity.Post, int, error)
+	GetAllByCategory(ctx context.Context, categoryName string) ([]entity.Post, int, error)
 	GetPostByID(ctx context.Context, postID uint) (entity.Post, int, error)
 	GetAllByUserID(ctx context.Context, userID uint) ([]entity.Post, int, error)
 	GetAllLikedPostsByUserID(ctx context.Context, userID uint, islike bool) ([]entity.Post, int, error)
 }
 
-type Tag interface {
-	CreateTags(ctx context.Context, tagsName []string) (int, error)
-	GetTagsIDByName(ctx context.Context, tagsName []string) ([]uint, int, error)
-	CreateTagsAndPostCon(ctx context.Context, tagsID []uint, postID uint) (int, error)
+type Category interface {
+	CreateCategorys(ctx context.Context, categorysName []string) (int, error)
+	GetCategorysIDByName(ctx context.Context, categorysName []string) ([]uint, int, error)
+	CreateCategorysAndPostCon(ctx context.Context, categorysID []uint, postID uint) (int, error)
+	CategoryExist(ctx context.Context, categoryName string) (bool, int, error)
+	GetAllCategories(ctx context.Context) ([]entity.Category, int, error)
 }
 
 type Comment interface {
@@ -45,16 +48,16 @@ type Repository struct {
 	Post
 	User
 	Session
-	Tag
+	Category
 	Comment
 }
 
 func NewRepository(db *sql.DB) *Repository {
 	return &Repository{
-		User:    newUserRepository(db),
-		Session: newSessionRepository(db),
-		Post:    newPostRepository(db),
-		Tag:     newTagRepository(db),
-		Comment: newCommentRepository(db),
+		User:     newUserRepository(db),
+		Session:  newSessionRepository(db),
+		Post:     newPostRepository(db),
+		Category: newCategoryRepository(db),
+		Comment:  newCommentRepository(db),
 	}
 }

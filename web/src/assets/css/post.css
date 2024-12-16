@@ -1,0 +1,132 @@
+.post-container {
+  background-color: var(--background-secondary);
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.post-details {
+  margin-bottom: 1.5rem;
+}
+
+.post-details h3 {
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+  font-size: 1.5rem;
+}
+
+.post-details a {
+  color: var(--accent-color);
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.post-details a:hover {
+  text-decoration: underline;
+}
+
+#post-tags {
+  color: var(--text-secondary);
+  margin-bottom: 1rem;
+}
+
+.post-content {
+  background-color: var(--background-primary);
+  border-radius: 10px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.post-content p {
+  color: var(--text-primary);
+  line-height: 1.6;
+}
+
+.post-actions {
+  display: flex;
+  justify-content: flex-start;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.post-like,
+.post-dislike {
+  display: flex;
+  align-items: center;
+  background-color: var(--background-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  padding: 0.5rem 1rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.post-like:hover,
+.post-dislike:hover {
+  background-color: var(--hover-color);
+}
+
+.comment-section {
+  background-color: var(--background-secondary);
+  border-radius: 10px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.comment-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.comments-container {
+  background-color: var(--background-secondary);
+  border-radius: 10px;
+  padding: 1.5rem;
+}
+
+.card {
+  background-color: var(--background-primary);
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  margin-bottom: 1rem;
+  overflow: hidden;
+}
+
+.card-header {
+  padding: 1rem;
+  background-color: var(--background-secondary);
+  color: var(--text-primary);
+  font-weight: bold;
+}
+
+.card-body {
+  padding: 1rem;
+}
+
+.card-text {
+  color: var(--text-secondary);
+}
+
+.comment-like,
+.comment-dislike {
+  background: none;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  color: var(--text-secondary);
+  cursor: pointer;
+  margin-right: 1rem;
+}
+
+.comment-like:hover,
+.comment-dislike:hover {
+  color: var(--accent-color);
+}
+
+.error-message {
+  color: red;
+  margin-top: 0.5rem;
+}

@@ -2,89 +2,222 @@ import AbstractView from "./AbstractView.js";
 import redirect from "../index.js";
 import fetcher from "../pkg/fetcher.js";
 
-const path = "/api/signup"
-
 const signup = async (email, username, password, rePassword) => {
-    let body = {
-        "email" : email,
-        "username": username,
-        "password" : password,
-        "cfmpsw" : rePassword
-    }
+  let body = {
+    email: email,
+    username: username,
+    password: password,
+    cfmpsw: rePassword,
+  };
 
-    const data = await fetcher.post(path, body)
-    if (data && data.msg !== undefined){
-        let showErr = document.getElementById("showError")
-        showErr.innerHTML = data.msg
-        return
-    }
-    redirect.navigateTo('/sign-in')
-}
+  const data = await fetcher.post("/api/signup", body);
+  if (data && data.msg !== undefined) {
+    let showErr = document.getElementById("showError");
+    showErr.innerHTML = data.msg;
+    return;
+  }
+  redirect.navigateTo("/sign-in");
+};
 
-export default class extends AbstractView{
-    constructor(params){
-        super(params);
-        this.setTitle("Sign-up");
-    }
-    async getHtml(){
-        return `
-        <style>
-        .form-signup {
-        max-width: 400px;
-        padding: 15px;
-        }
-        
-        .form-signup .form-floating:focus-within {
-        z-index: 2;
-        }
-        
-        .form-signup input[type="email"] {
-        margin-bottom: -1px;
-        border-bottom-right-radius: 0;
-        border-bottom-left-radius: 0;
-        }
-        
-        .form-signup input[type="password"] {
-        border-top-left-radius: 0;
-        border-top-right-radius: 0;
-        }
-        .form-signup .rePassword{
-            margin-bottom: 10px;
-        }
-    </style>
-    <main class="form-signup w-100 m-auto">
-        <form id="form-signup" class="form-signup text-center" onsubmit="return false;">
-            <h1 class="h1 mb-3 fw-normal">Please sign up</h1>
-            <div class="form-floating">
-                <input type="email" class="form-control" id="email" placeholder="name@example.com">
-                <label for="email">Email address</label>
+export default class extends AbstractView {
+  constructor(params) {
+    super(params);
+    this.setTitle("Sign Up");
+  }
+
+  async getHtml() {
+    return `
+        <main class="auth-container">
+            <div class="auth-wrapper">
+                <form id="sign-up-form" class="auth-form">
+                    <h2 class="form-title">Create Your Account</h2>
+                    
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <input 
+                            type="email" 
+                            id="email" 
+                            class="form-control" 
+                            placeholder="Enter your email" 
+                            required
+                        >
+                        <div class="validation-message" id="email-error"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <input 
+                            type="text" 
+                            id="username" 
+                            class="form-control" 
+                            placeholder="Choose a username" 
+                            required
+                            minlength="3"
+                            maxlength="20"
+                        >
+                        <div class="validation-message" id="username-error"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input 
+                            type="password" 
+                            id="password" 
+                            class="form-control" 
+                            placeholder="Create a password" 
+                            required
+                            minlength="6"
+                        >
+                        <div class="validation-message" id="password-error"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="rePassword">Confirm Password</label>
+                        <input 
+                            type="password" 
+                            id="rePassword" 
+                            class="form-control" 
+                            placeholder="Repeat your password" 
+                            required
+                        >
+                        <div class="validation-message" id="rePassword-error"></div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Sign Up</button>
+                    </div>
+
+                    <div class="form-footer">
+                        <p>
+                            Already have an account? 
+                            <a href="/sign-in" data-link>Sign In</a>
+                        </p>
+                    </div>
+
+                    <div id="showError" class="error-message"></div>
+                </form>
             </div>
-            <div class="form-floating">
-                <input type="text" class="form-control" id="username" placeholder="user">
-                <label for="username">Username</label>
-            </div>
-            <div class="form-floating">
-                <input type="password" class="form-control" id="password" placeholder="Password">
-                <label for="password">Password</label>
-            </div>
-            <div class="form-floating rePassword">
-                <input type="password" class="form-control" id="rePassword" placeholder="Password">
-                <label for="rePassword">Repeat Password</label>
-            </div>
-            <button class="w-100 btn btn-lg btn-primary" type="submit">Sign up</button>
-            <div id="showError"></div>
-        </form>
-    </main>
+        </main>
         `;
-    }
-    async init() {
-        const signUpForm = document.getElementById("form-signup")
-        signUpForm.addEventListener("submit", function () {
-            const email = document.getElementById("email").value
-            const username = document.getElementById("username").value
-            const password = document.getElementById("password").value
-            const rePassword = document.getElementById("rePassword").value
-            signup(email, username,password, rePassword)
-        })
-    }
+  }
+
+  async init() {
+    const signUpForm = document.getElementById("sign-up-form");
+
+    // Input elements
+    const emailInput = document.getElementById("email");
+    const usernameInput = document.getElementById("username");
+    const passwordInput = document.getElementById("password");
+    const rePasswordInput = document.getElementById("rePassword");
+
+    // Error message elements
+    const emailError = document.getElementById("email-error");
+    const usernameError = document.getElementById("username-error");
+    const passwordError = document.getElementById("password-error");
+    const rePasswordError = document.getElementById("rePassword-error");
+
+    // Email validation
+    const validateEmail = (email) => {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!email) {
+        emailError.textContent = "Email is required";
+        return false;
+      }
+      if (!emailRegex.test(email)) {
+        emailError.textContent = "Please enter a valid email address";
+        return false;
+      }
+      emailError.textContent = "";
+      return true;
+    };
+
+    // Username validation
+    const validateUsername = (username) => {
+      if (!username) {
+        usernameError.textContent = "Username is required";
+        return false;
+      }
+      if (username.length < 3) {
+        usernameError.textContent =
+          "Username must be at least 3 characters long";
+        return false;
+      }
+      if (username.length > 20) {
+        usernameError.textContent = "Username must be less than 20 characters";
+        return false;
+      }
+      usernameError.textContent = "";
+      return true;
+    };
+
+    // Password validation
+    const validatePassword = (password) => {
+      if (!password) {
+        passwordError.textContent = "Password is required";
+        return false;
+      }
+      if (password.length < 6) {
+        passwordError.textContent =
+          "Password must be at least 6 characters long";
+        return false;
+      }
+      passwordError.textContent = "";
+      return true;
+    };
+
+    // Confirm password validation
+    const validateConfirmPassword = (password, confirmPassword) => {
+      if (!confirmPassword) {
+        rePasswordError.textContent = "Please confirm your password";
+        return false;
+      }
+      if (password !== confirmPassword) {
+        rePasswordError.textContent = "Passwords do not match";
+        return false;
+      }
+      rePasswordError.textContent = "";
+      return true;
+    };
+
+    // Real-time validation
+    emailInput.addEventListener("input", () => validateEmail(emailInput.value));
+    usernameInput.addEventListener("input", () =>
+      validateUsername(usernameInput.value)
+    );
+    passwordInput.addEventListener("input", () =>
+      validatePassword(passwordInput.value)
+    );
+    rePasswordInput.addEventListener("input", () =>
+      validateConfirmPassword(passwordInput.value, rePasswordInput.value)
+    );
+
+    // Form submission
+    signUpForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      // Validate all fields
+      const isEmailValid = validateEmail(emailInput.value);
+      const isUsernameValid = validateUsername(usernameInput.value);
+      const isPasswordValid = validatePassword(passwordInput.value);
+      const isConfirmPasswordValid = validateConfirmPassword(
+        passwordInput.value,
+        rePasswordInput.value
+      );
+
+      // Only proceed if all validations pass
+      if (
+        isEmailValid &&
+        isUsernameValid &&
+        isPasswordValid &&
+        isConfirmPasswordValid
+      ) {
+        await signup(
+          emailInput.value,
+          usernameInput.value,
+          passwordInput.value,
+          rePasswordInput.value
+        );
+      }
+    });
+  }
 }

@@ -133,5 +133,10 @@ func (h *Handler) createRoutes() []Route {
 			Handler: h.deleteComment,
 			Role:    entity.Roles.User,
 		},
+		{
+			Path:    "/api/categories",
+			Handler: h.getAllCategories,
+			Role:    entity.Roles.Guest,
+		},
 	}
 }

@@ -59,7 +59,7 @@ func (h *Handler) identify(role uint, next http.HandlerFunc) http.HandlerFunc {
 			}
 			r = r.WithContext(context.WithValue(r.Context(), "id", id))
 			r = r.WithContext(context.WithValue(r.Context(), "token", headerParts[1]))
-			next(w, r)
+			next(w, r)	
 			return
 		}
 

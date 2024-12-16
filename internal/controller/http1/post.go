@@ -3,10 +3,11 @@ package http1
 import (
 	"encoding/json"
 	"fmt"
-	"forum/internal/entity"
 	"net/http"
 	"strconv"
 	"strings"
+
+	"forum/internal/entity"
 )
 
 func (h *Handler) getALLPosts(w http.ResponseWriter, r *http.Request) {
@@ -14,8 +15,8 @@ func (h *Handler) getALLPosts(w http.ResponseWriter, r *http.Request) {
 		h.errorHandler(w, r, http.StatusMethodNotAllowed, "not allowed method")
 		return
 	}
-	tag := r.URL.Path[len("/api/posts/"):]
-	posts, status, err := h.service.Post.GetAllByTag(r.Context(), tag)
+	category := r.URL.Path[len("/api/posts/"):]
+	posts, status, err := h.service.Post.GetAllByCategory(r.Context(), category)
 	if err != nil {
 		h.errorHandler(w, r, status, err.Error())
 		return
