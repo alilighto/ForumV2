@@ -52,13 +52,7 @@ func (s *PostService) CreatePost(ctx context.Context, input entity.Post) (uint, 
 		}
 		return 0, status, err
 	}
-	input.Categorys = append(input.Categorys, "ALL")
-	if status, err := s.categoryRepo.CreateCategorys(ctx, input.Categorys); err != nil {
-		if _, Posterr := s.postRepo.DeletePostByID(ctx, postID, input.UserID); Posterr != nil {
-			log.Println(Posterr)
-		}
-		return 0, status, err
-	}
+
 	CategoryIDS, status, err := s.categoryRepo.GetCategorysIDByName(ctx, input.Categorys)
 	if err != nil {
 		if _, Posterr := s.postRepo.DeletePostByID(ctx, postID, input.UserID); Posterr != nil {
@@ -90,11 +84,11 @@ func (s *PostService) UpsertPostVote(ctx context.Context, input entity.PostVote)
 	return s.postRepo.UpsertPostVote(ctx, input)
 }
 
-func (s *PostService) GetAllByCategory(ctx context.Context, categoryName string) ([]entity.Post, int, error) {
+func (s *PostService) GetAllByCategory(ctx context.Context, categoryName string, limit, offset int) ([]entity.Post, int, error) {
 	if strings.TrimSpace(categoryName) == "" {
 		return nil, http.StatusBadRequest, errors.New("invalid Category")
 	}
-	return s.postRepo.GetAllByCategory(ctx, categoryName)
+	return s.postRepo.GetAllByCategory(ctx, categoryName, limit, offset)
 }
 
 func (s *PostService) GetAllByUserID(ctx context.Context, userID uint) ([]entity.Post, int, error) {

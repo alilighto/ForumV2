@@ -46,6 +46,7 @@ func (h *Handler) identify(role uint, next http.HandlerFunc) http.HandlerFunc {
 				h.errorHandler(w, r, http.StatusUnauthorized, "invalid token")
 				return
 			}
+			
 			id, err := smpljwt.ParseToken(headerParts[1], h.secret)
 			if err != nil {
 				if err == smpljwt.ErrExpiredToken {

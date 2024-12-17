@@ -24,7 +24,7 @@ type Post interface {
 	CreatePost(ctx context.Context, input entity.Post) (uint, int, error)
 	DeletePostByID(ctx context.Context, PostID uint, userID uint) (int, error)
 	UpsertPostVote(ctx context.Context, input entity.PostVote) (int, error)
-	GetAllByCategory(ctx context.Context, categoryName string) ([]entity.Post, int, error)
+	GetAllByCategory(ctx context.Context, categoryName string, limit, offset int) ([]entity.Post, int, error)
 	GetPostByID(ctx context.Context, postID uint) (entity.Post, int, error)
 	GetAllByUserID(ctx context.Context, userID uint) ([]entity.Post, int, error)
 	GetAllLikedPostsByUserID(ctx context.Context, userID uint, islike bool) ([]entity.Post, int, error)

@@ -16,7 +16,13 @@ func (h *Handler) getALLPosts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	category := r.URL.Path[len("/api/posts/"):]
-	posts, status, err := h.service.Post.GetAllByCategory(r.Context(), category)
+	limitStr := r.URL.Query().Get("limit")
+	offsetStr := r.URL.Query().Get("offset")
+
+	limit, _ := strconv.Atoi(limitStr)
+	offset, _ := strconv.Atoi(offsetStr)
+
+	posts, status, err := h.service.Post.GetAllByCategory(r.Context(), category, limit, offset)
 	if err != nil {
 		h.errorHandler(w, r, status, err.Error())
 		return

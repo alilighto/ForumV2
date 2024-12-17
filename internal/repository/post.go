@@ -17,7 +17,7 @@ func newPostRepository(db *sql.DB) *PostRepository {
 	return &PostRepository{db: db}
 }
 
-func (r *PostRepository) GetAllByCategory(ctx context.Context, categoryName string) ([]entity.Post, int, error) {
+func (r *PostRepository) GetAllByCategory(ctx context.Context, categoryName string, limit, offset int) ([]entity.Post, int, error) {
 	var query string
 	var args []interface{}
 
@@ -35,8 +35,10 @@ func (r *PostRepository) GetAllByCategory(ctx context.Context, categoryName stri
         FROM
             post p
             INNER JOIN users u ON u.id = p.user_id
-        ORDER BY p.id;
+        ORDER BY p.id
+        LIMIT $1 OFFSET $2;
         `
+		args = []interface{}{limit, offset}
 	} else {
 		query = `
         SELECT
@@ -53,9 +55,11 @@ func (r *PostRepository) GetAllByCategory(ctx context.Context, categoryName stri
             INNER JOIN category_and_post tp ON p.id = tp.post_id
             INNER JOIN category t ON tp.category_id = t.id
             INNER JOIN users u ON u.id = p.user_id
-        WHERE t.name = $1;
+        WHERE t.name = $1
+        ORDER BY p.id
+        LIMIT $2 OFFSET $3;
         `
-		args = []interface{}{categoryName}
+		args = []interface{}{categoryName, limit, offset}
 	}
 
 	prep, err := r.db.PrepareContext(ctx, query)
