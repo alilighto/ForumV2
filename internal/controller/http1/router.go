@@ -2,11 +2,12 @@ package http1
 
 import (
 	"fmt"
+	"net/http"
+	"text/template"
+
 	"forum/internal/entity"
 	"forum/internal/service"
 	"forum/pkg/config"
-	"net/http"
-	"text/template"
 )
 
 type Handler struct {
@@ -131,6 +132,11 @@ func (h *Handler) createRoutes() []Route {
 			Path:    "/api/comment/delete/",
 			Handler: h.deleteComment,
 			Role:    entity.Roles.User,
+		},
+		{
+			Path:    "/api/categories",
+			Handler: h.getAllCategories,
+			Role:    entity.Roles.Guest,
 		},
 	}
 }

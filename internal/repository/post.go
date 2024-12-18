@@ -4,8 +4,9 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"forum/internal/entity"
 	"net/http"
+
+	"forum/internal/entity"
 )
 
 type PostRepository struct {
@@ -16,43 +17,100 @@ func newPostRepository(db *sql.DB) *PostRepository {
 	return &PostRepository{db: db}
 }
 
-func (r *PostRepository) GetAllByTag(ctx context.Context, tagName string) ([]entity.Post, int, error) {
-	query := `
-	SELECT
-		p.id,
-		p.user_id,
-		p.title,
-		p.data,
-		u.username
-	FROM
-		post p
-		INNER JOIN tag_and_post tp ON p.id = tp.post_id
-		INNER JOIN tags t ON tp.tag_id = t.id
-		INNER JOIN users u ON u.id = p.user_id
-	WHERE t.name = $1;
-	`
+func (r *PostRepository) GetAllByCategory(ctx context.Context, categoryName string) ([]entity.Post, int, error) {
+	var query string
+	var args []interface{}
+
+	if categoryName == "ALL" {
+		query = `
+        SELECT
+            p.id,
+            p.user_id,
+            p.title,
+            p.data,
+            u.username,
+            (SELECT COUNT(*) FROM post_vote WHERE post_id = p.id AND vote = 1) as likes,
+            (SELECT COUNT(*) FROM post_vote WHERE post_id = p.id AND vote = 0) as dislikes,
+            (SELECT COUNT(*) FROM comment WHERE post_id = p.id) as comments_count
+        FROM
+            post p
+            INNER JOIN users u ON u.id = p.user_id
+        ORDER BY p.id;
+        `
+	} else {
+		query = `
+        SELECT
+            p.id,
+            p.user_id,
+            p.title,
+            p.data,
+            u.username,
+            (SELECT COUNT(*) FROM post_vote WHERE post_id = p.id AND vote = 1) as likes,
+            (SELECT COUNT(*) FROM post_vote WHERE post_id = p.id AND vote = 0) as dislikes,
+            (SELECT COUNT(*) FROM comment WHERE post_id = p.id) as comments_count
+        FROM
+            post p
+            INNER JOIN category_and_post tp ON p.id = tp.post_id
+            INNER JOIN category t ON tp.category_id = t.id
+            INNER JOIN users u ON u.id = p.user_id
+        WHERE t.name = $1;
+        `
+		args = []interface{}{categoryName}
+	}
+
 	prep, err := r.db.PrepareContext(ctx, query)
 	if err != nil {
 		return nil, http.StatusInternalServerError, err
 	}
 	defer prep.Close()
+
 	posts := []entity.Post{}
-	rows, err := prep.QueryContext(ctx, tagName)
+	var rows *sql.Rows
+
+	if categoryName == "ALL" {
+		rows, err = prep.QueryContext(ctx)
+	} else {
+		rows, err = prep.QueryContext(ctx, args...)
+	}
+
 	if err != nil {
 		return nil, http.StatusBadRequest, err
 	}
+	defer rows.Close()
+
 	for rows.Next() {
 		post := entity.Post{}
-		if err := rows.Scan(&post.PostID, &post.UserID, &post.Title, &post.Data, &post.UserName); err != nil {
+		if err := rows.Scan(
+			&post.PostID,
+			&post.UserID,
+			&post.Title,
+			&post.Data,
+			&post.UserName,
+			&post.Likes,
+			&post.Dislikes,
+			&post.CommentsCount,
+		); err != nil {
 			return nil, http.StatusInternalServerError, err
 		}
-		tags, status, err := r.getTagsByPostID(ctx, post.PostID)
+
+		// Fetch categories
+		categorys, status, err := r.getCategorysByPostID(ctx, post.PostID)
 		if err != nil {
 			return nil, status, err
 		}
-		post.Tags = tags
+		post.Categorys = categorys
+
 		posts = append(posts, post)
 	}
+
+	if err := rows.Err(); err != nil {
+		return nil, http.StatusInternalServerError, err
+	}
+
+	if len(posts) == 0 {
+		return nil, http.StatusNotFound, fmt.Errorf("no posts found for category: %s", categoryName)
+	}
+
 	return posts, http.StatusOK, nil
 }
 
@@ -84,11 +142,11 @@ func (r *PostRepository) GetAllByUserID(ctx context.Context, userID uint) ([]ent
 		if err := rows.Scan(&post.PostID, &post.UserID, &post.Title, &post.Data, &post.UserName); err != nil {
 			return nil, http.StatusInternalServerError, err
 		}
-		tags, status, err := r.getTagsByPostID(ctx, post.PostID)
+		categorys, status, err := r.getCategorysByPostID(ctx, post.PostID)
 		if err != nil {
 			return nil, status, err
 		}
-		post.Tags = tags
+		post.Categorys = categorys
 		posts = append(posts, post)
 	}
 	return posts, http.StatusOK, nil
@@ -128,11 +186,11 @@ func (r *PostRepository) GetAllLikedPostsByUserID(ctx context.Context, userID ui
 		if err := rows.Scan(&post.PostID, &post.UserID, &post.Title, &post.Data, &post.UserName); err != nil {
 			return nil, http.StatusInternalServerError, err
 		}
-		tags, status, err := r.getTagsByPostID(ctx, post.PostID)
+		categorys, status, err := r.getCategorysByPostID(ctx, post.PostID)
 		if err != nil {
 			return nil, status, err
 		}
-		post.Tags = tags
+		post.Categorys = categorys
 		posts = append(posts, post)
 	}
 	return posts, http.StatusOK, nil
@@ -163,11 +221,11 @@ func (r *PostRepository) GetPostByID(ctx context.Context, postID uint) (entity.P
 	if err := prep.QueryRowContext(ctx, postID).Scan(&post.PostID, &post.UserID, &post.Title, &post.Data, &post.UserName, &post.Likes, &post.Dislikes); err != nil {
 		return post, http.StatusNotFound, err
 	}
-	tags, status, err := r.getTagsByPostID(ctx, postID)
+	Categorys, status, err := r.getCategorysByPostID(ctx, postID)
 	if err != nil {
 		return post, status, err
 	}
-	post.Tags = tags
+	post.Categorys = Categorys
 
 	comments, status, err := r.getCommentsByPostID(ctx, postID)
 	if err != nil {
@@ -218,13 +276,13 @@ func (r *PostRepository) getCommentsByPostID(ctx context.Context, postID uint) (
 	return comments, http.StatusOK, nil
 }
 
-func (r *PostRepository) getTagsByPostID(ctx context.Context, postID uint) ([]string, int, error) {
+func (r *PostRepository) getCategorysByPostID(ctx context.Context, postID uint) ([]string, int, error) {
 	query := `
 	SELECT
 		t.name
 	FROM 
-		tags t
-		INNER JOIN tag_and_post tp ON tp.post_id = $1 and t.id = tp.tag_id
+		category t
+		INNER JOIN category_and_post tp ON tp.post_id = $1 and t.id = tp.category_id
 	`
 	prep, err := r.db.PrepareContext(ctx, query)
 	if err != nil {
@@ -234,15 +292,16 @@ func (r *PostRepository) getTagsByPostID(ctx context.Context, postID uint) ([]st
 	if err != nil {
 		return nil, http.StatusInternalServerError, err
 	}
-	tags := []string{}
+	categorys := []string{}
 	for rows.Next() {
-		var tag string
-		if err := rows.Scan(&tag); err != nil {
+		var category string
+		if err := rows.Scan(&category); err != nil {
 			return nil, http.StatusBadRequest, err
 		}
-		tags = append(tags, tag)
+		categorys = append(categorys, category)
 	}
-	return tags, http.StatusOK, nil
+
+	return categorys, http.StatusOK, nil
 }
 
 func (r *PostRepository) CreatePost(ctx context.Context, input entity.Post) (uint, int, error) {

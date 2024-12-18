@@ -3,22 +3,23 @@ package service
 import (
 	"context"
 	"errors"
-	"forum/internal/entity"
-	"forum/internal/repository"
 	"log"
 	"net/http"
 	"strings"
+
+	"forum/internal/entity"
+	"forum/internal/repository"
 )
 
 type PostService struct {
-	postRepo repository.Post
-	tagRepo  repository.Tag
+	postRepo     repository.Post
+	categoryRepo repository.Category
 }
 
-func newPostService(postRepo repository.Post, tagRepo repository.Tag) *PostService {
+func newPostService(postRepo repository.Post, categoryRepo repository.Category) *PostService {
 	return &PostService{
-		postRepo: postRepo,
-		tagRepo:  tagRepo,
+		postRepo:     postRepo,
+		categoryRepo: categoryRepo,
 	}
 }
 
@@ -27,14 +28,23 @@ func (s *PostService) CreatePost(ctx context.Context, input entity.Post) (uint, 
 		return 0, http.StatusBadRequest, errors.New("data is empty")
 	} else if input.Title == "" || len(input.Title) > 58 {
 		return 0, http.StatusBadRequest, errors.New("title is empty")
-	} else if len(input.Tags) == 0 || len(input.Tags) > 5 {
-		return 0, http.StatusBadRequest, errors.New("tags is empty")
+	} else if len(input.Categorys) == 0 {
+		return 0, http.StatusBadRequest, errors.New("categorys is empty")
+	} else if len(input.Categorys) > 5 {
+		return 0, http.StatusBadRequest, errors.New("max categorys are 5")
 	}
-	for _, tag := range input.Tags {
-		if len(tag) == 0 || len(tag) > 20 {
-			return 0, http.StatusBadRequest, errors.New("invalid tag")
+
+	for _, category := range input.Categorys {
+		exist, status, err := s.categoryRepo.CategoryExist(ctx, category)
+		if err != nil {
+			return 0, status, err
+		}
+
+		if !exist {
+			return 0, status, err
 		}
 	}
+
 	postID, status, err := s.postRepo.CreatePost(ctx, input)
 	if err != nil {
 		if _, Posterr := s.postRepo.DeletePostByID(ctx, postID, input.UserID); Posterr != nil {
@@ -42,21 +52,15 @@ func (s *PostService) CreatePost(ctx context.Context, input entity.Post) (uint, 
 		}
 		return 0, status, err
 	}
-	input.Tags = append(input.Tags, "ALL")
-	if status, err := s.tagRepo.CreateTags(ctx, input.Tags); err != nil {
-		if _, Posterr := s.postRepo.DeletePostByID(ctx, postID, input.UserID); Posterr != nil {
-			log.Println(Posterr)
-		}
-		return 0, status, err
-	}
-	tagIDS, status, err := s.tagRepo.GetTagsIDByName(ctx, input.Tags)
+
+	CategoryIDS, status, err := s.categoryRepo.GetCategorysIDByName(ctx, input.Categorys)
 	if err != nil {
 		if _, Posterr := s.postRepo.DeletePostByID(ctx, postID, input.UserID); Posterr != nil {
 			log.Println(Posterr)
 		}
 		return 0, status, err
 	}
-	if status, err := s.tagRepo.CreateTagsAndPostCon(ctx, tagIDS, postID); err != nil {
+	if status, err := s.categoryRepo.CreateCategorysAndPostCon(ctx, CategoryIDS, postID); err != nil {
 		if _, Posterr := s.postRepo.DeletePostByID(ctx, postID, input.UserID); Posterr != nil {
 			log.Println(Posterr)
 		}
@@ -80,11 +84,11 @@ func (s *PostService) UpsertPostVote(ctx context.Context, input entity.PostVote)
 	return s.postRepo.UpsertPostVote(ctx, input)
 }
 
-func (s *PostService) GetAllByTag(ctx context.Context, tagName string) ([]entity.Post, int, error) {
-	if strings.TrimSpace(tagName) == "" {
-		return nil, http.StatusBadRequest, errors.New("invalid tag")
+func (s *PostService) GetAllByCategory(ctx context.Context, categoryName string) ([]entity.Post, int, error) {
+	if strings.TrimSpace(categoryName) == "" {
+		return nil, http.StatusBadRequest, errors.New("invalid Category")
 	}
-	return s.postRepo.GetAllByTag(ctx, tagName)
+	return s.postRepo.GetAllByCategory(ctx, categoryName)
 }
 
 func (s *PostService) GetAllByUserID(ctx context.Context, userID uint) ([]entity.Post, int, error) {

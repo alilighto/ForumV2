@@ -1,25 +1,27 @@
 package entity
 
 type Post struct {
-	PostID   uint      `json:"post_id"`
-	UserID   uint      `json:"user_id"`
-	UserName string    `json:"username"`
-	Tags     []string  `json:"tags"`
-	Title    string    `json:"title"`
-	Data     string    `json:"data"`
-	Likes    uint      `json:"likes"`
-	Dislikes uint      `json:"dislikes"`
-	Comments []Comment `json:"comments"`
+	PostID        uint      `json:"post_id"`
+	UserID        uint      `json:"user_id"`
+	UserName      string    `json:"username"`
+	Title         string    `json:"title"`
+	Data          string    `json:"data"`
+	Likes         uint      `json:"likes"`
+	Dislikes      uint      `json:"dislikes"`
+	Comments      []Comment `json:"comments"`
+	CommentsCount uint      `json:"comments_count"`
+	Categorys     []string  `json:"categories"`
 }
 
-type Tag struct {
-	TagID uint
-	Name  string
+type Category struct {
+	CategoryID  uint   `json:"id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
 }
 
-type TagAndPost struct {
-	TagID  uint
-	PostID uint
+type CategoryAndPost struct {
+	CategoryID uint
+	PostID     uint
 }
 
 type PostVote struct {

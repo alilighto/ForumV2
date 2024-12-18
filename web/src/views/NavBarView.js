@@ -1,51 +1,61 @@
 import AbstractView from "./AbstractView.js";
 import Utils from "../pkg/Utils.js";
 
-export default class extends AbstractView{
-    constructor(params, user){
-        super(params);
-        this.user = user
-    }
-    async getHtml(){
-        const isAuthorized = Boolean(this.user.id)
-        return `
-        <div class="container-fluid">
-            <ul class="navbar-nav me-auto mb-2 mb-sm-0">
-                <li class="nav-item">
-                    <a href="/" class="nav-link" id="home-button" data-link>Home</a>
-                </li>
-        `+ (isAuthorized ?
-        `
-                <li class="nav-item">
-                    <a href="/create-post" class="nav-link" id="create-post-button" data-link>Create Post</a>
-                </li>
-                <li class="nav-item">
-                    <a href="/user/${this.user.id}" class="nav-link" id="Profile-button" data-link>Profile</a>
-                </li>
-                <li class="nav-item">
-                    <a href="/" class="nav-link" id="sign-out-button" data-link>Sign Out</a>
-                </li>
-            </ul> 
+export default class extends AbstractView {
+  constructor(params, user) {
+    super(params);
+    this.user = user;
+  }
+
+  async getHtml() {
+    const isAuthorized = Boolean(this.user.id);
+    return `
+        <div class="logo">Forum App</div>
+
+        <div class="navbar-search">
+            <input
+                type="text"
+                placeholder="Search posts, topics..."
+                class="search-input"
+            />
         </div>
-        `:
-        `       <li class="nav-item">
-                    <a href="/sign-up" class="nav-link" id="sign-in-button" data-link>Sign Up</a>
-                </li>
-                <li class="nav-item">
-                    <a href="/sign-in" class="nav-link" id="sign-up-button" data-link>Sign In</a>
-                </li>
-            </ul>   
+
+        <div id="nav-auth-links" class="${isAuthorized ? "hidden" : ""}">
+            <button id="login-btn" class="btn login">Login</button>
+            <button id="register-btn" class="btn register">Register</button>
         </div>
-        `
-        );
-    }
-    async init() {
-        document.body.addEventListener('click', (event) => {
-            if (event.target.id === 'sign-out-button') {
-                console.log("log");
-                Utils.logOut();
-                window.location.reload();
-            }
+        <div id="nav-user-links" class="${isAuthorized ? "" : "hidden"}">
+            <span id="username-display">${this.user.username || "User"}</span>
+            <button id="create-post-btn" class="btn create">Create Post</button>
+            <button id="logout-btn" class="btn logout">Logout</button>
+        </div>
+        `;
+  }
+
+  async init() {
+    const isAuthorized = Boolean(this.user.id);
+
+    if (isAuthorized) {
+      // User-specific buttons
+      document
+        .getElementById("create-post-btn")
+        ?.addEventListener("click", () => {
+          window.location.href = "/create-post";
         });
+
+      document.getElementById("logout-btn")?.addEventListener("click", () => {
+        Utils.logOut();
+        window.location.reload();
+      });
+    } else {
+      // Login/Register buttons
+      document.getElementById("login-btn")?.addEventListener("click", () => {
+        window.location.href = "/sign-in";
+      });
+
+      document.getElementById("register-btn")?.addEventListener("click", () => {
+        window.location.href = "/sign-up";
+      });
     }
-};
+  }
+}

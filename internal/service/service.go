@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+
 	"forum/internal/entity"
 	"forum/internal/repository"
 )
@@ -23,9 +24,13 @@ type Post interface {
 	DeletePostByID(ctx context.Context, postID uint, userID uint) (int, error)
 	UpsertPostVote(ctx context.Context, input entity.PostVote) (int, error)
 	GetPostByID(ctx context.Context, postID uint) (entity.Post, int, error)
-	GetAllByTag(ctx context.Context, tagName string) ([]entity.Post, int, error)
+	GetAllByCategory(ctx context.Context, tagName string) ([]entity.Post, int, error)
 	GetAllByUserID(ctx context.Context, userID uint) ([]entity.Post, int, error)
 	GetAllLikedPostsByUserID(ctx context.Context, userID uint, islike bool) ([]entity.Post, int, error)
+}
+
+type Category interface {
+	GetAllCategorys(ctx context.Context) ([]entity.Category, int, error)
 }
 
 type Comment interface {
@@ -39,13 +44,15 @@ type Service struct {
 	Session
 	Post
 	Comment
+	Category
 }
 
 func NewService(repo *repository.Repository, secret string) *Service {
 	return &Service{
-		User:    newUserService(repo.User, repo.Session, secret),
-		Session: newSessionService(repo.Session),
-		Post:    newPostService(repo.Post, repo.Tag),
-		Comment: newCommentService(repo.Comment),
+		User:     newUserService(repo.User, repo.Session, secret),
+		Session:  newSessionService(repo.Session),
+		Post:     newPostService(repo.Post, repo.Category),
+		Comment:  newCommentService(repo.Comment),
+		Category: newCategoryService(repo.Category),
 	}
 }
