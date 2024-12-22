@@ -88,7 +88,7 @@ export default class extends AbstractView {
           "Please enter both email and password";
         return;
       }
-
+        
       await signIn(email, password);
     });
 

@@ -93,6 +93,11 @@ const router = async () => {
     view.addStyle(match.route.style);
   }
 
+  if (user.role < match.route.minRole) {
+    Utils.showError(401, "Please sign in to get access for this page");
+    return;
+  }
+
   if (match.route.view === Home) {
     // Load Navbar
     const NavBarView = new NavBar(null, user);
@@ -101,28 +106,22 @@ const router = async () => {
 
     // Load Sidebar
     const SideBarView = new SideBar(null, user);
-    document.querySelector(".sidebar").innerHTML = await SideBarView.getHtml();
-    SideBarView.init();
+    let sudeBarHtml = await SideBarView.getHtml();
 
     view.addStyle("navbar");
     view.addStyle("sidebar");
     view.addStyle("main-content");
     view.addStyle("post-card");
+
+    document.querySelector("#app").innerHTML =
+      sudeBarHtml + (await view.getHtml());
+    SideBarView.init();
   } else {
     // Clear navbar and sidebar if not HomeView
     document.querySelector("#navbar").innerHTML = "";
-    document.querySelector("#sidebar").innerHTML = "";
+    document.querySelector("#app").innerHTML = await view.getHtml();
   }
 
-  if (user.role < match.route.minRole) {
-    Utils.showError(401, "Please sign in to get access for this page");
-    return;
-  }
-
-  // Render view
-  document.querySelector(
-    `${match.route.view === Home ? "#posts" : "#app"}`
-  ).innerHTML = await view.getHtml();
   view.init();
 };
 

@@ -1,9 +1,10 @@
 package main
 
 import (
+	"log"
+
 	"forum/internal/app"
 	"forum/pkg/config"
-	"log"
 )
 
 func main() {

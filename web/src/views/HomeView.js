@@ -389,7 +389,9 @@ export default class extends AbstractView {
   }
 
   async getHtml() {
-    return `<!-- Posts will be dynamically populated here -->`;
+    return `<div id="posts" class="posts-grid">
+        <!-- Content will be dynamically populated -->
+      </div>`;
   }
 
   async init() {

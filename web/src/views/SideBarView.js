@@ -11,6 +11,7 @@ export default class extends AbstractView {
     const isAuthorized = Boolean(this.user.id);
 
     let sidebarHtml = `
+      <div id="sidebar" class="sidebar">
         ${
           isAuthorized
             ? `
@@ -36,6 +37,7 @@ export default class extends AbstractView {
             )
             .join("")}
         </div>
+      </div>
     `;
 
     return sidebarHtml;
