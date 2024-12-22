@@ -64,18 +64,19 @@ func (h *Handler) identify(role uint, next http.HandlerFunc) http.HandlerFunc {
 
 		cookie, err := r.Cookie("token")
 		if err != nil {
+			r = r.WithContext(context.WithValue(r.Context(), "id", 0))
 			next(w, r)
 			return
 		}
 
 		id, err := smpljwt.ParseToken(cookie.Value, h.secret)
 		if err != nil {
+			r = r.WithContext(context.WithValue(r.Context(), "id", 0))
 			next(w, r)
 			return
 		}
 		r = r.WithContext(context.WithValue(r.Context(), "id", id))
 		r = r.WithContext(context.WithValue(r.Context(), "token", cookie.Value))
-
 		next(w, r)
 	}
 }

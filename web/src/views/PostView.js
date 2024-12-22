@@ -10,13 +10,14 @@ const getPost = async (postID) => {
     return;
   }
   if (post) {
-    document.getElementById("post-title").innerText = "Title: " + post.title;
+    document.getElementById("post-title").innerText = post.title;
     const userEl = document.getElementById("post-user-id");
     userEl.innerText = "Author: " + post.username;
-    userEl.setAttribute("href", `/user/${post.user_id}`);
-    const formattedCategories = post?.categories?.map((tag) => " #" + tag);
+
+    const formattedCategories = post?.categories?.map((cat) => " #" + cat);
     document.getElementById("post-tags").innerText =
-      "Categories:" + formattedCategories?.slice(0, -1);
+      "Categories:" + formattedCategories;
+
 
     document.getElementById("post-data").innerText = post.data;
     document.getElementById("post-like-inner").innerText = post.likes;
@@ -196,7 +197,7 @@ export default class extends AbstractView {
                 <div class="post-details">
                     <h3 id="post-title"></h3>
                     <div id="post-user">
-                        <a id="post-user-id"></a>
+                        <span id="post-user-id"></span>
                     </div>
                     <h5 id="post-tags"></h5>
                     <div class="post-content">
