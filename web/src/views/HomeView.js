@@ -19,7 +19,7 @@ const getPostsByCategory = async (category) => {
   }
 
   if (posts && posts.msg !== undefined) {
-    postsDoc?.innerHTML = "<p>No posts</p>";
+    postsDoc.innerHTML = "<p>No posts</p>";
     return;
   }
   if (posts?.length) {

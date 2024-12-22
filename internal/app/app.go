@@ -1,25 +1,25 @@
 package app
 
 import (
-	"fmt"
+	"io"
+	"log"
+	"os"
+
 	"forum/internal/controller/http1"
 	"forum/internal/repository"
 	"forum/internal/server"
 	"forum/internal/service"
 	"forum/pkg/config"
 	"forum/pkg/database"
-	"io"
-	"log"
-	"os"
 )
 
-const secret string = "secret"
+const secret string = "Forum01Oujda"
 
 func Run(cfg *config.Conf) {
 	// Prepare logger
-	file, err := os.OpenFile("logfile.txt", os.O_APPEND|os.O_RDWR|os.O_CREATE, 0644)
+	file, err := os.OpenFile("logfile.log", os.O_APPEND|os.O_RDWR|os.O_CREATE, 0o644)
 	if err != nil {
-		fmt.Printf("cannot create log file: %v", err)
+		log.Printf("cannot create log file: %v", err)
 	}
 	defer file.Close()
 	logWriter := io.MultiWriter(file, os.Stdout)
