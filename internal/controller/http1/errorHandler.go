@@ -2,7 +2,7 @@ package http1
 
 import (
 	"encoding/json"
-	"fmt"
+	"log"
 	"net/http"
 	"time"
 )
@@ -13,8 +13,8 @@ type errorResponse struct {
 }
 
 func (h *Handler) errorHandler(w http.ResponseWriter, r *http.Request, status int, text string) {
-	fmt.Printf("%s %s [%s]\t%s%s - %d - %s\n", time.Now().Format("2006/01/02 15:04:05"), r.Proto, r.Method, r.Host, r.RequestURI, status, http.StatusText(status))
-	fmt.Println(text)
+	log.Printf("%s %s [%s]\t%s%s - %d - %s\n", time.Now().Format("2006/01/02 15:04:05"), r.Proto, r.Method, r.Host, r.RequestURI, status, http.StatusText(status))
+	log.Println(text)
 	e := errorResponse{
 		Status: status,
 		Msg:    text,

@@ -2,7 +2,7 @@ package http1
 
 import (
 	"encoding/json"
-	"fmt"
+	"log"
 	"net/http"
 )
 
@@ -14,7 +14,7 @@ func (h Handler) getAllCategories(w http.ResponseWriter, r *http.Request) {
 
 	categories, code, err := h.service.Category.GetAllCategorys(r.Context())
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		h.errorHandler(w, r, code, "internal server error")
 		return
 	}

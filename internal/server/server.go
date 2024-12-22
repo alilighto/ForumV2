@@ -1,9 +1,10 @@
 package server
 
 import (
-	"fmt"
-	"forum/pkg/config"
+	"log"
 	"net/http"
+
+	"forum/pkg/config"
 )
 
 type Server struct {
@@ -12,9 +13,9 @@ type Server struct {
 
 func (s *Server) Run(c *config.API, handler http.Handler) error {
 	s.httpServer = &http.Server{
-		Addr:    ":" + c.Port,
+		Addr:    c.Host + ":" + c.Port,
 		Handler: handler,
 	}
-	fmt.Printf("Server is running by: http://%v:%v/\n", c.Host, c.Port)
+	log.Printf("\033[32m Server is running...🚀\nLink: 🌐 http://%s", s.httpServer.Addr)
 	return s.httpServer.ListenAndServe()
 }

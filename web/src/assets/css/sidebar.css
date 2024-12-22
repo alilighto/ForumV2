@@ -32,11 +32,16 @@
 }
 
 @media screen and (max-width: 768px) {
-  .sidebar {
+  .main-content {
+    margin: 0 ;
+    padding: 10px;
+    gap: 10px;
     width: 100%;
-    height: auto;
-    position: static;
-    border-right: none;
-    border-bottom: 1px solid var(--border-color);
+  }
+  .sidebar {
+    position: sticky;
+    width: 100%;
+    height:auto;
+    z-index: 10;
   }
 }
