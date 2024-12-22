@@ -136,7 +136,7 @@ func (r *PostRepository) GetAllByUserID(ctx context.Context, userID uint, limit,
 	}
 	for rows.Next() {
 		post := entity.Post{}
-		if err := rows.Scan(&post.PostID, &post.UserID, &post.Title, &post.Data, &post.UserName); err != nil {
+		if err := rows.Scan(&post.PostID, &post.UserID, &post.Title, &post.Data, &post.UserName, &post.Likes, &post.Dislikes, &post.CommentsCount, &post.VoteStatus); err != nil {
 			return nil, http.StatusInternalServerError, err
 		}
 		categorys, status, err := r.getCategorysByPostID(ctx, post.PostID)

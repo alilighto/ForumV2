@@ -40,7 +40,6 @@ func (h *Handler) getPostbyID(w http.ResponseWriter, r *http.Request) {
 	}
 	strPostID := r.URL.Path[len("/api/post/"):]
 	id, err := strconv.Atoi(strPostID)
-	fmt.Println(uint(id))
 	if err != nil {
 		h.errorHandler(w, r, http.StatusBadRequest, "invalid post id")
 		return

@@ -4,6 +4,9 @@ import AbstractView from "./AbstractView.js";
 const getPostPath = "/api/post/";
 const sendCommentPath = "/api/comment/create";
 
+let likeListenerSet = false; // Flag to track like button listener
+let dislikeListenerSet = false; // Flag to track dislike button listener
+
 const getPost = async (postID) => {
   const post = await fetcher.get(getPostPath + postID);
   if (post && post.msg != undefined) {
@@ -18,20 +21,33 @@ const getPost = async (postID) => {
     document.getElementById("post-tags").innerText =
       "Categories:" + formattedCategories;
 
-
     document.getElementById("post-data").innerText = post.data;
     document.getElementById("post-like-inner").innerText = post.likes;
     document.getElementById("post-dislike-inner").innerText = post.dislikes;
 
     const likeBtn = document.getElementById("post-like");
-    likeBtn.addEventListener("click", () => {
-      votePost(postID, 1);
-    });
-
     const dislikeBtn = document.getElementById("post-dislike");
-    dislikeBtn.addEventListener("click", () => {
+
+    // Define named functions for event listeners
+    const handleLike = () => {
+      votePost(postID, 1);
+    };
+
+    const handleDislike = () => {
       votePost(postID, 0);
-    });
+    };
+
+    // Set up like button listener if not already set
+    if (!likeListenerSet) {
+      likeBtn.addEventListener("click", handleLike);
+      likeListenerSet = true; // Mark as set
+    }
+
+    // Set up dislike button listener if not already set
+    if (!dislikeListenerSet) {
+      dislikeBtn.addEventListener("click", handleDislike);
+      dislikeListenerSet = true; // Mark as set
+    }
 
     const commentsDoc = document.getElementById("comments");
     commentsDoc.innerHTML = ""; // Clear previous comments
@@ -51,6 +67,7 @@ const getPost = async (postID) => {
 };
 
 const votePost = async (postID, likeType) => {
+  console.log("postid", postID);
   const path = "/api/post/vote";
   const body = {
     post_id: parseInt(postID),
@@ -212,6 +229,7 @@ export default class extends AbstractView {
                         stroke-linejoin="round"
                         />
                     </svg>
+                    <p id="post-like-inner"></p>
                     </button>
                     <button class="btn post-dislike" id="post-dislike">
                       <svg xlmns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="post-stats-icon">
@@ -221,6 +239,7 @@ export default class extends AbstractView {
                             stroke-linejoin="round"
                           />
                       </svg>
+                    <p id="post-dislike-inner"></p>
                     </button>
                     </div>
                 </div>
