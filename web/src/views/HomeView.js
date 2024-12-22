@@ -46,12 +46,9 @@ const newPostElement = (post) => {
   const authorName = document.createElement("div");
   authorName.classList.add("post-author-name");
   authorName.textContent = post.username;
-  const postTimestamp = document.createElement("div");
-  postTimestamp.classList.add("post-timestamp");
-  postTimestamp.textContent = new Date(post.created_at).toLocaleString();
+
 
   headerContent.appendChild(authorName);
-  headerContent.appendChild(postTimestamp);
   postCardHeader.appendChild(headerContent);
 
   // Post Content
@@ -69,7 +66,9 @@ const newPostElement = (post) => {
   const postCategory = document.createElement("div");
   postCategory.classList.add("post-category");
   postCategory.style.color = "#3182ce";
-  postCategory.textContent = post.categories?.join(", ");
+  postCategory.textContent = post.categories
+    ?.filter((c) => c != "General")
+    ?.join(", ");
 
   postContent.appendChild(postTitle);
   postContent.appendChild(postExcerpt);

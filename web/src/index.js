@@ -114,16 +114,17 @@ const router = async () => {
 
     // Load Sidebar
     let sideBarHtml = "";
+    let SideBarView;
     if (match.route.view === Home) {
       view.addStyle("sidebar");
 
-      const SideBarView = new SideBar(null, user);
+      SideBarView = new SideBar(null, user);
       sideBarHtml = await SideBarView.getHtml();
-      SideBarView.init();
     }
 
     document.querySelector("#app").innerHTML =
       sideBarHtml + (await view.getHtml());
+    SideBarView?.init();
   } else {
     // Clear navbar and sidebar if not HomeView
     document.querySelector("#navbar").innerHTML = "";

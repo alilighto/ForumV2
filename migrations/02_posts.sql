@@ -4,4 +4,4 @@ CREATE TABLE IF NOT EXISTS post(
     title TEXT NOT NULL,
     data TEXT NOT NULL,
     FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
-);
+);  
