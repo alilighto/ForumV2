@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"text/template"
+	"time"
 
 	"forum/internal/entity"
 	"forum/internal/service"
@@ -13,6 +14,7 @@ import (
 type Handler struct {
 	service *service.Service
 	secret  string
+	*RateLimiter
 }
 
 type Route struct {
@@ -23,8 +25,9 @@ type Route struct {
 
 func NewHandler(service *service.Service, secret string) *Handler {
 	return &Handler{
-		service: service,
-		secret:  secret,
+		service:     service,
+		secret:      secret,
+		RateLimiter: NewRateLimiter(60, time.Minute),
 	}
 }
 
@@ -40,9 +43,9 @@ func (h *Handler) InitRoutes(conf *config.Conf) *http.ServeMux {
 			w.Write([]byte(err.Error()))
 			return
 		}
-		// if  r.URL.Path != "/" {
-		// 	w.WriteHeader(http.StatusNotFound)
-		// }
+		if r.URL.Path != "/" {
+			w.WriteHeader(http.StatusNotFound)
+		}
 		if err = tmpl.Execute(w, fmt.Sprintf("%v:%v", conf.API.Host, conf.API.Port)); err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte(err.Error()))
@@ -52,9 +55,9 @@ func (h *Handler) InitRoutes(conf *config.Conf) *http.ServeMux {
 	routes := h.createRoutes()
 	for _, route := range routes {
 		if route.Role == entity.Roles.Authorized {
-			mux.Handle(route.Path, h.corsMiddleWare(h.isAlreadyIdentified(route.Handler)))
+			mux.Handle(route.Path, h.Limiter(h.corsMiddleWare(h.isAlreadyIdentified(route.Handler))))
 		} else {
-			mux.Handle(route.Path, h.corsMiddleWare(h.identify(route.Role, route.Handler)))
+			mux.Handle(route.Path, h.Limiter(h.corsMiddleWare(h.identify(route.Role, route.Handler))))
 		}
 	}
 	return mux
