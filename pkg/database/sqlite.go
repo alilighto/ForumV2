@@ -3,9 +3,10 @@ package database
 import (
 	"database/sql"
 	"fmt"
-	"forum/pkg/config"
 	"os"
 	"path/filepath"
+
+	"forum/pkg/config"
 
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -31,6 +32,7 @@ func makeMigrations(db *sql.DB, schemeDir string) error {
 	if err != nil {
 		return err
 	}
+
 	for _, scheme := range schemes {
 		prep, err := db.Prepare(scheme)
 		if err != nil {

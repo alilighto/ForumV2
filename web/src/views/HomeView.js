@@ -3,20 +3,34 @@ import fetcher from "../pkg/fetcher.js";
 import Utils from "../pkg/Utils.js";
 
 const path = `/api/posts/`;
+let offset = 0;
+let limit = 20;
+let ended = false;
 
 const getPostsByCategory = async (category) => {
-  const data = await fetcher.get(path + category);
-  if (data && data.msg !== undefined) {
-    console.log(data);
+  const posts = await fetcher.get(
+    `${path}${category}?limit=${limit}&offset=${offset}`
+  );
+  const postsDoc = document.querySelector(".posts-grid");
+
+  if (posts && posts?.status == "404" && offset > 0) {
+    ended = true;
     return;
-  } else {
-    const postsGrid = document.querySelector(".posts-grid");
-    postsGrid.textContent = "";
-    for (let i = data.length - 1; i >= 0; i--) {
-      const post = data[i];
+  }
+
+  if (posts && posts.msg !== undefined) {
+    postsDoc.innerHTML = "<p>No posts</p>";
+    return;
+  }
+  if (posts?.length) {
+    for (let i = posts.length - 1; i >= 0; i--) {
+      const post = posts[i];
       const el = newPostElement(post);
-      postsGrid.append(el);
+      postsDoc.append(el);
     }
+    offset += 20;
+  } else {
+    postsDoc.innerHTML = "<p>No posts</p>"; // Display "No posts" message
   }
 };
 
@@ -80,12 +94,12 @@ const newPostElement = (post) => {
   likeIcon.setAttribute("stroke-width", "2");
   likeIcon.classList.add("post-stats-icon");
   likeIcon.innerHTML = `
-  <path 
-    d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"
-    stroke-linecap="round"
-    stroke-linejoin="round"
-  />
-`;
+    <path
+      d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+  `;
 
   // Dislike Icon (Thumbs Down)
   const dislikeIcon = document.createElementNS(
@@ -99,12 +113,11 @@ const newPostElement = (post) => {
   dislikeIcon.setAttribute("stroke-width", "2");
   dislikeIcon.classList.add("post-stats-icon");
   dislikeIcon.innerHTML = `
-  <path 
-    d="M10 15h4l4.38-9a2 2 0 0 0-2-2.7H7v11zM7 2a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h3"
-    stroke-linecap="round"
-    stroke-linejoin="round"
-  />
-`;
+<path 
+  d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zM17 2h3a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-3"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+/>`;
 
   // Comment Icon (Speech Bubble with Text)
   const commentIcon = document.createElementNS(
@@ -130,7 +143,7 @@ const newPostElement = (post) => {
   const likeCount = document.createElement("span");
   likeCount.textContent = post.likes || 0;
   likeCount.classList.add("post-stats-count");
-  console.log(post);
+
   // Dislike count
   const dislikeCount = document.createElement("span");
   dislikeCount.textContent = post.dislikes || 0;
@@ -170,6 +183,20 @@ const newPostElement = (post) => {
     window.location.href = `/post/${post.post_id}`;
   });
 
+  // check vote status
+  if (post?.vote_status == 1) {
+    if (likeButton) {
+      likeButton.classList.add("active");
+      dislikeButton.classList.remove("active");
+    }
+  }
+  if (post?.vote_status == 2) {
+    if (dislikeButton) {
+      dislikeButton.classList.add("active");
+      likeButton.classList.remove("active");
+    }
+  }
+
   // Append buttons to stats
   postStats.appendChild(likeButton);
   postStats.appendChild(dislikeButton);
@@ -183,15 +210,6 @@ const newPostElement = (post) => {
   postCard.appendChild(postActions);
 
   return postCard;
-};
-
-// Function to toggle active state
-const toggleActiveState = (button, isActive) => {
-  if (isActive) {
-    button.classList.add("active");
-  } else {
-    button.classList.remove("active");
-  }
 };
 
 const votePost = async (postId, voteType) => {
@@ -237,37 +255,132 @@ const updatePostInList = async (postId) => {
 
     updateCount("like-button", updatedPost.likes);
     updateCount("dislike-button", updatedPost.dislikes);
+    const likeButton = postCard.querySelector(".like-button");
+    const dislikeButton = postCard.querySelector(".dislike-button");
+
+    if (updatedPost?.vote_status == 1) {
+      likeButton?.classList?.add("active");
+      dislikeButton?.classList?.remove("active");
+    } else if (updatedPost?.vote_status == 2) {
+      dislikeButton?.classList?.add("active");
+      likeButton?.classList?.remove("active");
+    } else {
+      dislikeButton?.classList?.remove("active");
+      likeButton?.classList?.remove("active");
+    }
   } catch (error) {
     console.error("Error updating post:", error);
   }
 };
 
 const getUserPosts = async (userID) => {
-  const path = `/api/profile/posts/${userID}`;
+  const path = `/api/profile/posts/${userID}?limit=10&offset=${offset}`;
   const posts = await fetcher.get(path);
-  if (posts && posts.msg != undefined) {
-    return [];
+
+  if (posts && posts?.status == "404" && offset > 0) {
+    ended = true;
+    return;
   }
-  return posts;
+
+  const postsDoc = document.querySelector(".posts-grid");
+
+  if (posts && posts.msg !== undefined) {
+    postsDoc.innerHTML = "<p>No posts</p>";
+    return;
+  }
+  if (posts?.length) {
+    for (let i = posts.length - 1; i >= 0; i--) {
+      const post = posts[i];
+      const el = newPostElement(post);
+      postsDoc.append(el);
+    }
+    offset += 10;
+  } else {
+    postsDoc.innerHTML = "<p>No posts</p>"; // Display "No posts" message
+  }
 };
 
 const getUserLikedPosts = async (userID) => {
-  const path = `/api/profile/liked-posts/${userID}`;
+  const path = `/api/profile/liked-posts/${userID}?limit=10&offset=${offset}`;
   const posts = await fetcher.get(path);
-  if (posts && posts.msg != undefined) {
-    return [];
+
+  if (posts && posts?.status == "404" && offset > 0) {
+    ended = true;
+    return;
   }
-  return posts;
+
+  const postsDoc = document.querySelector(".posts-grid");
+
+  if (posts && posts.msg !== undefined) {
+    postsDoc.innerHTML = "<p>No posts</p>";
+    return;
+  }
+  if (posts?.length) {
+    for (let i = posts.length - 1; i >= 0; i--) {
+      const post = posts[i];
+      const el = newPostElement(post);
+      postsDoc.append(el);
+    }
+    offset += 10;
+  } else {
+    postsDoc.innerHTML = "<p>No posts</p>"; // Display "No posts" message
+  }
 };
 
 const getUserDislikedPosts = async (userID) => {
-  const path = `/api/profile/disliked-posts/${userID}`;
+  const path = `/api/profile/disliked-posts/${userID}?limit=10&offset=${offset}`;
   const posts = await fetcher.get(path);
-  if (posts && posts.msg != undefined) {
-    return [];
+
+  if (posts && posts?.status == "404" && offset > 0) {
+    ended = true;
+    return;
   }
-  return posts;
+
+  const postsDoc = document.querySelector(".posts-grid");
+
+  if (posts && posts.msg !== undefined) {
+    postsDoc.innerHTML = "<p>No posts</p>";
+    return;
+  }
+  if (posts?.length) {
+    for (let i = posts.length - 1; i >= 0; i--) {
+      const post = posts[i];
+      const el = newPostElement(post);
+      postsDoc.append(el);
+    }
+    offset += 10;
+  } else {
+    postsDoc.innerHTML = "<p>No posts</p>"; // Display "No posts" message
+    ended = true;
+  }
 };
+
+let isThrottled = false;
+let timeout;
+
+async function handleScroll() {
+  if (ended) {
+    console.log("No more posts to load. Removing scroll listener.");
+    window.removeEventListener("scroll", handleScroll); // Remove the event listener
+    return;
+  }
+
+  if (isThrottled) {
+    return;
+  }
+
+  isThrottled = true;
+
+  timeout = setTimeout(async () => {
+    if (window.scrollY + window.innerHeight >= document.body.offsetHeight) {
+      console.log("Reached the bottom of the page.");
+      // Load more posts
+      await getPostsByCategory("General");
+    }
+
+    isThrottled = false;
+  }, 200);
+}
 
 export default class extends AbstractView {
   constructor(params) {
@@ -276,61 +389,34 @@ export default class extends AbstractView {
   }
 
   async getHtml() {
-    return `
-        <main class="main-content">
-            <div class="posts-grid">
-                <!-- Posts will be dynamically populated here -->
-            </div>
-        </main>
-        `;
+    return `<!-- Posts will be dynamically populated here -->`;
   }
 
   async init() {
+    const postsGrid = document.querySelector(".posts-grid");
+    postsGrid.textContent = "";
     // Initial load of posts
-    await getPostsByCategory("ALL");
+    await getPostsByCategory("General");
+
+    // add scroll event listener
+    window.addEventListener("scroll", handleScroll);
 
     const user = Utils.getUser();
 
     document.addEventListener("category-selected", async (e) => {
       const category = e.detail.category;
-
-      let posts;
-      if (category === "my-posts") {
-        posts = await getUserPosts(user.id); // Fetch user's created posts
-      } else if (category === "liked-posts") {
-        posts = await getUserLikedPosts(user.id); // Fetch user's liked posts
-      } else if (category === "disliked-posts") {
-        posts = await getUserDislikedPosts(user.id); // Fetch user's disliked posts
-      } else {
-        posts = await getPostsByCategory(category); // Fetch posts by category
-      }
-
+      offset = 0;
       const postsDoc = document.querySelector(".posts-grid");
       postsDoc.textContent = ""; // Clear previous posts
 
-      if (posts && posts.msg !== undefined) {
-        return;
-      }
-
-      if (posts) {
-        if (posts.length === 0) {
-          postsDoc.innerHTML = "<p>No posts</p>"; // Display "No posts" message
-          return;
-        }
-        for (let i = posts.length - 1; i >= 0; i--) {
-          const post = posts[i];
-          const el = newPostElement(post);
-          postsDoc.append(el);
-        }
-      }
-    });
-
-    // Listen for search events from navbar
-    const navbarSearch = document.querySelector(".search-input");
-    navbarSearch.addEventListener("keyup", async (e) => {
-      if (e.key === "Enter") {
-        const category = navbarSearch.value.trim() || "ALL";
-        await getPostsByCategory(category);
+      if (category === "my-posts") {
+        await getUserPosts(user.id); // Fetch user's created posts
+      } else if (category === "liked-posts") {
+        await getUserLikedPosts(user.id); // Fetch user's liked posts
+      } else if (category === "disliked-posts") {
+        await getUserDislikedPosts(user.id); // Fetch user's disliked posts
+      } else {
+        await getPostsByCategory(category); // Fetch posts by category
       }
     });
   }

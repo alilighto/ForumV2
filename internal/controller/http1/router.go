@@ -32,12 +32,16 @@ func (h *Handler) InitRoutes(conf *config.Conf) *http.ServeMux {
 	mux := http.NewServeMux()
 	fs := http.FileServer(http.Dir("./web/src"))
 	mux.Handle("/src/", http.StripPrefix("/src/", fs))
+
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		tmpl, err := template.ParseFiles("./web/index.html")
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte(err.Error()))
 			return
+		}
+		if  r.URL.Path != "/" {
+			w.WriteHeader(http.StatusNotFound)
 		}
 		if err = tmpl.Execute(w, fmt.Sprintf("%v:%v", conf.API.Host, conf.API.Port)); err != nil {
 			w.WriteHeader(http.StatusInternalServerError)

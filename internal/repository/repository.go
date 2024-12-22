@@ -26,8 +26,8 @@ type Post interface {
 	UpsertPostVote(ctx context.Context, input entity.PostVote) (int, error)
 	GetAllByCategory(ctx context.Context, categoryName string, limit, offset int) ([]entity.Post, int, error)
 	GetPostByID(ctx context.Context, postID uint) (entity.Post, int, error)
-	GetAllByUserID(ctx context.Context, userID uint) ([]entity.Post, int, error)
-	GetAllLikedPostsByUserID(ctx context.Context, userID uint, islike bool) ([]entity.Post, int, error)
+	GetAllByUserID(ctx context.Context, userID uint, limit, offset int) ([]entity.Post, int, error)
+	GetAllLikedPostsByUserID(ctx context.Context, userID uint, islike bool, limit, offset int) ([]entity.Post, int, error)
 }
 
 type Category interface {

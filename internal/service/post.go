@@ -91,10 +91,10 @@ func (s *PostService) GetAllByCategory(ctx context.Context, categoryName string,
 	return s.postRepo.GetAllByCategory(ctx, categoryName, limit, offset)
 }
 
-func (s *PostService) GetAllByUserID(ctx context.Context, userID uint) ([]entity.Post, int, error) {
-	return s.postRepo.GetAllByUserID(ctx, userID)
+func (s *PostService) GetAllByUserID(ctx context.Context, userID uint, limit, offset int) ([]entity.Post, int, error) {
+	return s.postRepo.GetAllByUserID(ctx, userID, limit, offset)
 }
 
-func (s *PostService) GetAllLikedPostsByUserID(ctx context.Context, userID uint, islike bool) ([]entity.Post, int, error) {
-	return s.postRepo.GetAllLikedPostsByUserID(ctx, userID, islike)
+func (s *PostService) GetAllLikedPostsByUserID(ctx context.Context, userID uint, islike bool, limit, offset int) ([]entity.Post, int, error) {
+	return s.postRepo.GetAllLikedPostsByUserID(ctx, userID, islike, limit, offset)
 }

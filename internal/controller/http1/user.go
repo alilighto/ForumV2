@@ -3,11 +3,12 @@ package http1
 import (
 	"encoding/json"
 	"fmt"
-	"forum/internal/entity"
-	smpljwt "forum/pkg/smplJwt"
 	"net/http"
 	"strconv"
-	"strings"
+	"time"
+
+	"forum/internal/entity"
+	smpljwt "forum/pkg/smplJwt"
 )
 
 func (h *Handler) signUp(w http.ResponseWriter, r *http.Request) {
@@ -45,6 +46,15 @@ func (h *Handler) signIn(w http.ResponseWriter, r *http.Request) {
 		h.errorHandler(w, r, status, err.Error())
 		return
 	}
+
+	http.SetCookie(w, &http.Cookie{
+		Name:     "token",
+		Value:    token,
+		Path:     "/",
+		Expires:  time.Now().Add(12 * time.Hour),
+		HttpOnly: true,
+	})
+
 	if err := json.NewEncoder(w).Encode(map[string]interface{}{
 		"token": token,
 	}); err != nil {
@@ -84,29 +94,22 @@ func (h *Handler) isValidToken(w http.ResponseWriter, r *http.Request) {
 		h.errorHandler(w, r, http.StatusMethodNotAllowed, "not allowed method")
 		return
 	}
-	header, ok := r.Header["Authorization"]
-	if !ok {
-		if err := json.NewEncoder(w).Encode(map[string]interface{}{
-			"checker": false,
-		}); err != nil {
-			h.errorHandler(w, r, http.StatusInternalServerError, err.Error())
+	cookie, err := r.Cookie("token")
+	if err != nil {
+		if err == http.ErrNoCookie {
+			if err := json.NewEncoder(w).Encode(map[string]interface{}{
+				"checker": false,
+			}); err != nil {
+				h.errorHandler(w, r, http.StatusInternalServerError, err.Error())
+				return
+			}
 			return
 		}
+		h.errorHandler(w, r, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	headerParts := strings.Split(header[0], " ")
-	if len(headerParts) != 2 {
-		if err := json.NewEncoder(w).Encode(map[string]interface{}{
-			"checker": false,
-		}); err != nil {
-			h.errorHandler(w, r, http.StatusInternalServerError, err.Error())
-			return
-		}
-		return
-	}
-
-	exist, err := h.service.IsTokenExist(r.Context(), headerParts[1])
+	exist, err := h.service.IsTokenExist(r.Context(), cookie.Value)
 	if err != nil {
 		h.errorHandler(w, r, http.StatusInternalServerError, err.Error())
 		return
@@ -120,10 +123,10 @@ func (h *Handler) isValidToken(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-	_, err = smpljwt.ParseToken(headerParts[1], h.secret)
+	_, err = smpljwt.ParseToken(cookie.Value, h.secret)
 	if err != nil {
 		if err == smpljwt.ErrExpiredToken {
-			if dberr := h.service.DeleteSessionByToken(r.Context(), headerParts[1]); dberr != nil {
+			if dberr := h.service.DeleteSessionByToken(r.Context(), cookie.Value); dberr != nil {
 				h.errorHandler(w, r, http.StatusInternalServerError, dberr.Error())
 				return
 			}
@@ -154,5 +157,13 @@ func (h *Handler) signOut(w http.ResponseWriter, r *http.Request) {
 		h.errorHandler(w, r, http.StatusInternalServerError, err.Error())
 		return
 	}
+
+	http.SetCookie(w, &http.Cookie{
+		Name:   "token",
+		Value:  "",
+		Path:   "/",
+		MaxAge: -1,
+	})
+
 	w.WriteHeader(http.StatusOK)
 }

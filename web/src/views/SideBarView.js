@@ -11,7 +11,6 @@ export default class extends AbstractView {
     const isAuthorized = Boolean(this.user.id);
 
     let sidebarHtml = `
-      <aside class="sidebar">
         ${
           isAuthorized
             ? `
@@ -30,14 +29,13 @@ export default class extends AbstractView {
           ${categories
             .map(
               (category) => `
-            <div class="sidebar-menu-item" data-category="${category.name.toLowerCase()}">
+            <div class="sidebar-menu-item" data-category="${category.name}">
               ${category.name}
             </div>
           `
             )
             .join("")}
         </div>
-      </aside>
     `;
 
     return sidebarHtml;

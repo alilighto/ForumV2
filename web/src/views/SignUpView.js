@@ -27,7 +27,6 @@ export default class extends AbstractView {
 
   async getHtml() {
     return `
-        <main class="auth-container">
             <div class="auth-wrapper">
                 <form id="sign-up-form" class="auth-form">
                     <h2 class="form-title">Create Your Account</h2>
@@ -97,7 +96,6 @@ export default class extends AbstractView {
                     <div id="showError" class="error-message"></div>
                 </form>
             </div>
-        </main>
         `;
   }
 

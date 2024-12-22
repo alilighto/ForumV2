@@ -18,49 +18,36 @@ func newPostRepository(db *sql.DB) *PostRepository {
 }
 
 func (r *PostRepository) GetAllByCategory(ctx context.Context, categoryName string, limit, offset int) ([]entity.Post, int, error) {
-	var query string
-	var args []interface{}
-
-	if categoryName == "ALL" {
-		query = `
-        SELECT
-            p.id,
-            p.user_id,
-            p.title,
-            p.data,
-            u.username,
-            (SELECT COUNT(*) FROM post_vote WHERE post_id = p.id AND vote = 1) as likes,
-            (SELECT COUNT(*) FROM post_vote WHERE post_id = p.id AND vote = 0) as dislikes,
-            (SELECT COUNT(*) FROM comment WHERE post_id = p.id) as comments_count
-        FROM
-            post p
-            INNER JOIN users u ON u.id = p.user_id
-        ORDER BY p.id
-        LIMIT $1 OFFSET $2;
-        `
-		args = []interface{}{limit, offset}
-	} else {
-		query = `
-        SELECT
-            p.id,
-            p.user_id,
-            p.title,
-            p.data,
-            u.username,
-            (SELECT COUNT(*) FROM post_vote WHERE post_id = p.id AND vote = 1) as likes,
-            (SELECT COUNT(*) FROM post_vote WHERE post_id = p.id AND vote = 0) as dislikes,
-            (SELECT COUNT(*) FROM comment WHERE post_id = p.id) as comments_count
-        FROM
-            post p
-            INNER JOIN category_and_post tp ON p.id = tp.post_id
-            INNER JOIN category t ON tp.category_id = t.id
-            INNER JOIN users u ON u.id = p.user_id
-        WHERE t.name = $1
-        ORDER BY p.id
-        LIMIT $2 OFFSET $3;
-        `
-		args = []interface{}{categoryName, limit, offset}
+	userId := ctx.Value("id")
+	if userId == nil {
+		userId = 0
 	}
+
+	query := `
+SELECT
+    p.id,
+    p.user_id,
+    p.title,
+    p.data,
+    u.username,
+    (SELECT COUNT(*) FROM post_vote WHERE post_id = p.id AND vote = 1) as likes,
+    (SELECT COUNT(*) FROM post_vote WHERE post_id = p.id AND vote = 0) as dislikes,
+    (SELECT COUNT(*) FROM comment WHERE post_id = p.id) as comments_count,
+    CASE 
+	    WHEN $1 = 0 THEN 0
+        WHEN EXISTS (SELECT 1 FROM post_vote WHERE post_id = p.id AND user_id = $1 AND vote = 1) THEN 1
+        WHEN EXISTS (SELECT 1 FROM post_vote WHERE post_id = p.id AND user_id = $1 AND vote = 0) THEN 2
+        ELSE 0
+    END as vote_status
+FROM
+    post p
+    INNER JOIN category_and_post tp ON p.id = tp.post_id
+    INNER JOIN users u ON u.id = p.user_id
+    INNER JOIN category t ON tp.category_id = t.id
+WHERE t.name = $2
+ORDER BY p.id
+LIMIT $3 OFFSET $4;
+`
 
 	prep, err := r.db.PrepareContext(ctx, query)
 	if err != nil {
@@ -69,20 +56,15 @@ func (r *PostRepository) GetAllByCategory(ctx context.Context, categoryName stri
 	defer prep.Close()
 
 	posts := []entity.Post{}
-	var rows *sql.Rows
 
-	if categoryName == "ALL" {
-		rows, err = prep.QueryContext(ctx)
-	} else {
-		rows, err = prep.QueryContext(ctx, args...)
-	}
-
+	rows, err := prep.QueryContext(ctx, userId, categoryName, limit, offset)
 	if err != nil {
 		return nil, http.StatusBadRequest, err
 	}
 	defer rows.Close()
 
 	for rows.Next() {
+
 		post := entity.Post{}
 		if err := rows.Scan(
 			&post.PostID,
@@ -93,6 +75,7 @@ func (r *PostRepository) GetAllByCategory(ctx context.Context, categoryName stri
 			&post.Likes,
 			&post.Dislikes,
 			&post.CommentsCount,
+			&post.VoteStatus,
 		); err != nil {
 			return nil, http.StatusInternalServerError, err
 		}
@@ -118,7 +101,7 @@ func (r *PostRepository) GetAllByCategory(ctx context.Context, categoryName stri
 	return posts, http.StatusOK, nil
 }
 
-func (r *PostRepository) GetAllByUserID(ctx context.Context, userID uint) ([]entity.Post, int, error) {
+func (r *PostRepository) GetAllByUserID(ctx context.Context, userID uint, limit, offset int) ([]entity.Post, int, error) {
 	posts := []entity.Post{}
 	query := `
 	SELECT
@@ -126,18 +109,28 @@ func (r *PostRepository) GetAllByUserID(ctx context.Context, userID uint) ([]ent
 		p.user_id,
 		p.title,
 		p.data,
-		u.username
+		u.username,
+	    (SELECT COUNT(*) FROM post_vote WHERE post_id = p.id AND vote = 1) as likes,
+    	(SELECT COUNT(*) FROM post_vote WHERE post_id = p.id AND vote = 0) as dislikes,
+    	(SELECT COUNT(*) FROM comment WHERE post_id = p.id) as comments_count,
+	CASE 
+	    WHEN $1 = 0 THEN 0
+        WHEN EXISTS (SELECT 1 FROM post_vote WHERE post_id = p.id AND user_id = $1 AND vote = 1) THEN 1
+        WHEN EXISTS (SELECT 1 FROM post_vote WHERE post_id = p.id AND user_id = $1 AND vote = 0) THEN 2
+        ELSE 0
+    END as vote_status
 	FROM
 		post p
 		INNER JOIN users u ON u.id = p.user_id
-	WHERE p.user_id = $1;
+	WHERE p.user_id = $1
+	LIMIT $2 OFFSET $3;
 	`
 	prep, err := r.db.PrepareContext(ctx, query)
 	if err != nil {
 		return nil, http.StatusInternalServerError, err
 	}
 	defer prep.Close()
-	rows, err := prep.QueryContext(ctx, userID)
+	rows, err := prep.QueryContext(ctx, userID, limit, offset)
 	if err != nil {
 		return nil, http.StatusBadRequest, err
 	}
@@ -156,7 +149,7 @@ func (r *PostRepository) GetAllByUserID(ctx context.Context, userID uint) ([]ent
 	return posts, http.StatusOK, nil
 }
 
-func (r *PostRepository) GetAllLikedPostsByUserID(ctx context.Context, userID uint, islike bool) ([]entity.Post, int, error) {
+func (r *PostRepository) GetAllLikedPostsByUserID(ctx context.Context, userID uint, islike bool, limit, offset int) ([]entity.Post, int, error) {
 	posts := []entity.Post{}
 	query := `
 	SELECT
@@ -164,13 +157,17 @@ func (r *PostRepository) GetAllLikedPostsByUserID(ctx context.Context, userID ui
 		p.user_id,
 		p.title,
 		p.data,
-		u.username
+		u.username,
+		(SELECT COUNT(*) FROM post_vote WHERE post_id = p.id AND vote = 1) as likes,
+    	(SELECT COUNT(*) FROM post_vote WHERE post_id = p.id AND vote = 0) as dislikes,
+    	(SELECT COUNT(*) FROM comment WHERE post_id = p.id) as comments_count
 	FROM
 		post p
 	INNER JOIN users u on p.user_id = u.id
 	INNER JOIN post_vote pv ON p.id = pv.post_id
 	WHERE
 		pv.user_id = $1 AND pv.vote = %d
+		LIMIT $2 OFFSET $3;
 	`
 	if islike {
 		query = fmt.Sprintf(query, 1)
@@ -181,13 +178,13 @@ func (r *PostRepository) GetAllLikedPostsByUserID(ctx context.Context, userID ui
 	if err != nil {
 		return nil, http.StatusInternalServerError, err
 	}
-	rows, err := prep.QueryContext(ctx, userID)
+	rows, err := prep.QueryContext(ctx, userID, limit, offset)
 	if err != nil {
 		return nil, http.StatusBadRequest, err
 	}
 	for rows.Next() {
 		post := entity.Post{}
-		if err := rows.Scan(&post.PostID, &post.UserID, &post.Title, &post.Data, &post.UserName); err != nil {
+		if err := rows.Scan(&post.PostID, &post.UserID, &post.Title, &post.Data, &post.UserName, &post.Likes, &post.Dislikes, &post.CommentsCount); err != nil {
 			return nil, http.StatusInternalServerError, err
 		}
 		categorys, status, err := r.getCategorysByPostID(ctx, post.PostID)
@@ -195,6 +192,11 @@ func (r *PostRepository) GetAllLikedPostsByUserID(ctx context.Context, userID ui
 			return nil, status, err
 		}
 		post.Categorys = categorys
+		if islike {
+			post.VoteStatus = 1
+		} else {
+			post.VoteStatus = 2
+		}
 		posts = append(posts, post)
 	}
 	return posts, http.StatusOK, nil
@@ -210,19 +212,28 @@ func (r *PostRepository) GetPostByID(ctx context.Context, postID uint) (entity.P
 		p.data,
 		u.username,
 		COALESCE(COUNT(CASE WHEN pv.vote = 1 THEN 1 END), 0) AS voting,
-		COALESCE(COUNT(CASE WHEN pv.vote = 0 THEN 1 END), 0) AS voting1
+		COALESCE(COUNT(CASE WHEN pv.vote = 0 THEN 1 END), 0) AS voting1,
+	CASE 
+	    WHEN $1 = 0 THEN 0
+        WHEN EXISTS (SELECT 1 FROM post_vote WHERE post_id = p.id AND user_id = $1 AND vote = 1) THEN 1
+        WHEN EXISTS (SELECT 1 FROM post_vote WHERE post_id = p.id AND user_id = $1 AND vote = 0) THEN 2
+        ELSE 0
+    END AS vote_status
 	FROM
 		post p
 		INNER JOIN users u ON p.user_id = u.id
 		LEFT JOIN post_vote pv ON p.id = pv.post_id
 	WHERE
-		p.id = $1
+		p.id = $2
 	`
 	prep, err := r.db.PrepareContext(ctx, query)
 	if err != nil {
 		return post, http.StatusInternalServerError, err
 	}
-	if err := prep.QueryRowContext(ctx, postID).Scan(&post.PostID, &post.UserID, &post.Title, &post.Data, &post.UserName, &post.Likes, &post.Dislikes); err != nil {
+
+	userId := ctx.Value("id").(int)
+
+	if err := prep.QueryRowContext(ctx, userId, postID).Scan(&post.PostID, &post.UserID, &post.Title, &post.Data, &post.UserName, &post.Likes, &post.Dislikes, &post.VoteStatus); err != nil {
 		return post, http.StatusNotFound, err
 	}
 	Categorys, status, err := r.getCategorysByPostID(ctx, postID)
@@ -247,13 +258,19 @@ func (r *PostRepository) getCommentsByPostID(ctx context.Context, postID uint) (
 		c.data,
 		u.username,
 		COALESCE(COUNT(CASE WHEN cv.vote = 1 THEN 1 END), 0) AS voting,
-		COALESCE(COUNT(CASE WHEN cv.vote = 0 THEN 1 END), 0) AS voting1
+		COALESCE(COUNT(CASE WHEN cv.vote = 0 THEN 1 END), 0) AS voting1,
+	CASE 
+        WHEN $1 = 0 THEN 0
+        WHEN EXISTS (SELECT 1 FROM comment_vote WHERE comment_id = c.id AND user_id = $1 AND vote = 1) THEN 1
+        WHEN EXISTS (SELECT 1 FROM comment_vote WHERE comment_id = c.id AND user_id = $1 AND vote = 0) THEN 2
+        ELSE 0
+    END as vote_status
 	FROM 
 		comment c
 		INNER JOIN users u ON c.user_id = u.id
 		LEFT JOIN comment_vote cv ON c.id = cv.comment_id
 	WHERE 
-		c.post_id = $1
+		c.post_id = $2
 	GROUP BY
 		c.id, c.user_id, c.data, u.username;
 	`
@@ -263,7 +280,11 @@ func (r *PostRepository) getCommentsByPostID(ctx context.Context, postID uint) (
 	}
 	defer prep.Close()
 
-	rows, err := prep.QueryContext(ctx, postID)
+	userId := ctx.Value("id")
+	if userId == nil {
+		userId = 0
+	}
+	rows, err := prep.QueryContext(ctx, userId, postID)
 	if err != nil {
 		return nil, http.StatusBadRequest, err
 	}
@@ -271,7 +292,7 @@ func (r *PostRepository) getCommentsByPostID(ctx context.Context, postID uint) (
 	comments := []entity.Comment{}
 	for rows.Next() {
 		comment := entity.Comment{}
-		if err := rows.Scan(&comment.CommentID, &comment.UserID, &comment.Data, &comment.UserName, &comment.Likes, &comment.Dislikes); err != nil {
+		if err := rows.Scan(&comment.CommentID, &comment.UserID, &comment.Data, &comment.UserName, &comment.Likes, &comment.Dislikes, &comment.VoteStatus); err != nil {
 			return nil, http.StatusInternalServerError, err
 		}
 		comment.PostID = postID

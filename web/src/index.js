@@ -66,8 +66,8 @@ const router = async () => {
   if (checker && !checker.checker) {
     localStorage.setItem("role", roles.guest);
     localStorage.removeItem("id");
-    localStorage.removeItem("token");
   }
+
   const user = Utils.getUser();
 
   if (!user.role) {
@@ -83,25 +83,8 @@ const router = async () => {
     return;
   }
 
-  if (match.route.path === "/") {
-    // Load Navbar
-    const NavBarView = new NavBar(null, user);
-    document.querySelector("#navbar").innerHTML = await NavBarView.getHtml();
-    NavBarView.init();
-
-    // Load Sidebar
-    const SideBarView = new SideBar(null, user);
-    document.querySelector("#sidebar").innerHTML = await SideBarView.getHtml();
-    SideBarView.init();
-  }
-
-  if (user.role < match.route.minRole) {
-    Utils.showError(401, "Please sign in to get access for this page");
-    return;
-  }
-
+  // Check if the current view is HomeView
   const view = new match.route.view(getParams(match), user);
-
   // Remove previous view-specific styles
   view.removeStyles();
 
@@ -110,15 +93,36 @@ const router = async () => {
     view.addStyle(match.route.style);
   }
 
-  // Add global styles
-  view.addStyle("global");
-  view.addStyle("navbar");
-  view.addStyle("sidebar");
-  view.addStyle("main-content");
-  view.addStyle("post-card");
+  if (match.route.view === Home) {
+    // Load Navbar
+    const NavBarView = new NavBar(null, user);
+    document.querySelector("#navbar").innerHTML = await NavBarView.getHtml();
+    NavBarView.init();
+
+    // Load Sidebar
+    const SideBarView = new SideBar(null, user);
+    document.querySelector(".sidebar").innerHTML = await SideBarView.getHtml();
+    SideBarView.init();
+
+    view.addStyle("navbar");
+    view.addStyle("sidebar");
+    view.addStyle("main-content");
+    view.addStyle("post-card");
+  } else {
+    // Clear navbar and sidebar if not HomeView
+    document.querySelector("#navbar").innerHTML = "";
+    document.querySelector("#sidebar").innerHTML = "";
+  }
+
+  if (user.role < match.route.minRole) {
+    Utils.showError(401, "Please sign in to get access for this page");
+    return;
+  }
 
   // Render view
-  document.querySelector("#app").innerHTML = await view.getHtml();
+  document.querySelector(
+    `${match.route.view === Home ? "#posts" : "#app"}`
+  ).innerHTML = await view.getHtml();
   view.init();
 };
 

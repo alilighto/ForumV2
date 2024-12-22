@@ -37,6 +37,7 @@ func (r *UserRepository) GetUserIDByEmail(ctx context.Context, email string) (en
 		return user, http.StatusInternalServerError, err
 	}
 	defer prep.Close()
+	
 	if err = prep.QueryRowContext(ctx, email).Scan(&user.ID, &user.Password); err != nil {
 		return user, http.StatusBadRequest, err
 	}

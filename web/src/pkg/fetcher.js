@@ -14,13 +14,7 @@ const fetcher = {
       mode: "cors",
       method: "GET",
     };
-    const token = localStorage.getItem("token");
-    if (token != undefined) {
-      options.headers = new Headers({
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      });
-    }
+
     const response = await fetch(url, options).catch((e) => {
       console.log(e);
       Utils.showError(503);
@@ -37,6 +31,7 @@ const fetcher = {
       Utils.showError(response.status, responseBody.msg);
       return responseBody;
     }
+
     return responseBody;
   },
 };
@@ -48,13 +43,7 @@ const makeRequest = async (path, body, method) => {
     method: method,
     body: JSON.stringify(body),
   };
-  const token = localStorage.getItem("token");
-  if (token != undefined) {
-    options.headers = new Headers({
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    });
-  }
+
   const response = await fetch(url, options).catch((e) => {
     console.log(e);
     Utils.showError(503);
@@ -74,8 +63,7 @@ const makeRequest = async (path, body, method) => {
     return responseBody;
   }
   if (response.status == 404) {
-    Utils.showError(response.status);
-    return;
+    return { status: 404 };
   }
   if (response.status == 400) {
     return responseBody;

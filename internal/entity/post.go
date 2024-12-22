@@ -8,6 +8,7 @@ type Post struct {
 	Data          string    `json:"data"`
 	Likes         uint      `json:"likes"`
 	Dislikes      uint      `json:"dislikes"`
+	VoteStatus    uint      `json:"vote_status"` // 0: no vote, 1: like, 2: dislike
 	Comments      []Comment `json:"comments"`
 	CommentsCount uint      `json:"comments_count"`
 	Categorys     []string  `json:"categories"`

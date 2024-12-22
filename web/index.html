@@ -12,13 +12,15 @@
     <nav id="navbar" class="navbar">
       <!-- Content will be dynamically populated by NavBarView -->
     </nav>
-    <!-- sidebar -->
-    <aside id="sidebar">
-      <!-- Sidebar will be dynamically populated -->
-    </aside>
 
     <main id="app" class="main-content">
-      <!-- Content will be dynamically populated by router -->
+      <!-- sidebar -->
+      <div id="sidebar" class="sidebar">
+        <!-- Sidebar will be dynamically populated -->
+      </div>
+      <div id="posts" class="posts-grid">
+        <!-- Content will be dynamically populated -->
+      </div>
     </main>
     <script>
       const API_HOST_NAME = `{{.}}`;

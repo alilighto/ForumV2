@@ -42,7 +42,9 @@ export default class {
 
       // Validate the fetched categories
       if (Array.isArray(fetchedCategories)) {
-        this.categories = fetchedCategories;
+        this.categories = fetchedCategories.filter(
+          (cat) => cat?.name != "General"
+        );
         return this.categories;
       } else {
         console.error("Fetched categories is not an array:", fetchedCategories);

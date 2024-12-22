@@ -44,6 +44,7 @@ func (h *Handler) getPostbyID(w http.ResponseWriter, r *http.Request) {
 		h.errorHandler(w, r, http.StatusBadRequest, "invalid post id")
 		return
 	}
+
 	post, status, err := h.service.Post.GetPostByID(r.Context(), uint(id))
 	if err != nil {
 		h.errorHandler(w, r, status, err.Error())
@@ -142,7 +143,13 @@ func (h *Handler) getAllPostsByUserID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	posts, status, err := h.service.Post.GetAllByUserID(r.Context(), uint(userID))
+	limitStr := r.URL.Query().Get("limit")
+	offsetStr := r.URL.Query().Get("offset")
+
+	limit, _ := strconv.Atoi(limitStr)
+	offset, _ := strconv.Atoi(offsetStr)
+
+	posts, status, err := h.service.Post.GetAllByUserID(r.Context(), uint(userID), limit, offset)
 	if err != nil {
 		h.errorHandler(w, r, status, err.Error())
 		return
@@ -168,7 +175,14 @@ func (h *Handler) getAllLikedPostsByUserID(w http.ResponseWriter, r *http.Reques
 		h.errorHandler(w, r, http.StatusNotFound, "not found")
 		return
 	}
-	posts, status, err := h.service.Post.GetAllLikedPostsByUserID(r.Context(), uint(userID), true)
+
+	limitStr := r.URL.Query().Get("limit")
+	offsetStr := r.URL.Query().Get("offset")
+
+	limit, _ := strconv.Atoi(limitStr)
+	offset, _ := strconv.Atoi(offsetStr)
+
+	posts, status, err := h.service.Post.GetAllLikedPostsByUserID(r.Context(), uint(userID), true, limit, offset)
 	if err != nil {
 		h.errorHandler(w, r, status, err.Error())
 		return
@@ -191,10 +205,17 @@ func (h *Handler) getAllDisLikedPostsByUserID(w http.ResponseWriter, r *http.Req
 		return
 	}
 	if userID < 0 {
-		h.errorHandler(w, r, http.StatusNotFound, err.Error())
+		h.errorHandler(w, r, http.StatusNotFound, "invalid id")
 		return
 	}
-	posts, status, err := h.service.Post.GetAllLikedPostsByUserID(r.Context(), uint(userID), false)
+
+	limitStr := r.URL.Query().Get("limit")
+	offsetStr := r.URL.Query().Get("offset")
+
+	limit, _ := strconv.Atoi(limitStr)
+	offset, _ := strconv.Atoi(offsetStr)
+
+	posts, status, err := h.service.Post.GetAllLikedPostsByUserID(r.Context(), uint(userID), false, limit, offset)
 	if err != nil {
 		h.errorHandler(w, r, status, err.Error())
 		return

@@ -121,7 +121,6 @@ export default class extends AbstractView {
 
   async getHtml() {
     return `
-        <main class="main-content">
             <div class="profile-container">
                 <div class="profile-header">
                     <img 
@@ -147,7 +146,6 @@ export default class extends AbstractView {
                     <!-- Posts will be dynamically populated here -->
                 </div>
             </div>
-        </main>
         `;
   }
 

@@ -100,23 +100,52 @@ const drawComments = (comment) => {
   dataEl.innerText = comment.data;
   body.append(dataEl);
 
+  // Like Icon (Thumbs Up)
+  const likeIcon = document.createElementNS(
+    "http://www.w3.org/2000/svg",
+    "svg"
+  );
+  likeIcon.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+  likeIcon.setAttribute("viewBox", "0 0 24 24");
+  likeIcon.setAttribute("fill", "none");
+  likeIcon.setAttribute("stroke", "currentColor");
+  likeIcon.setAttribute("stroke-width", "2");
+  likeIcon.classList.add("post-stats-icon");
+  likeIcon.innerHTML = `
+      <path
+        d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      />
+    `;
+
+  // Dislike Icon (Thumbs Down)
+  const dislikeIcon = document.createElementNS(
+    "http://www.w3.org/2000/svg",
+    "svg"
+  );
+  dislikeIcon.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+  dislikeIcon.setAttribute("viewBox", "0 0 24 24");
+  dislikeIcon.setAttribute("fill", "none");
+  dislikeIcon.setAttribute("stroke", "currentColor");
+  dislikeIcon.setAttribute("stroke-width", "2");
+  dislikeIcon.classList.add("post-stats-icon");
+  dislikeIcon.innerHTML = `
+  <path 
+    d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zM17 2h3a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-3"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />`;
+
   let likeButton = document.createElement("button");
   likeButton.className = "btn comment-like";
   likeButton.id = "comment-like";
-  let likeIcon = document.createElement("i");
-  likeIcon.className = "fa fa-thumbs-up fa-lg";
-  likeIcon.id = "comment-like-inner";
-  likeIcon.setAttribute("aria-hidden", "true");
   likeIcon.innerText = comment.likes;
   likeButton.appendChild(likeIcon);
 
   let dislikeButton = document.createElement("button");
   dislikeButton.className = "btn comment-dislike";
   dislikeButton.id = "comment-dislike";
-  let dislikeIcon = document.createElement("i");
-  dislikeIcon.className = "fa fa-thumbs-down fa-lg";
-  dislikeIcon.id = "comment-dislike-inner";
-  dislikeIcon.setAttribute("aria-hidden", "true");
   dislikeIcon.innerText = comment.dislikes;
   dislikeButton.appendChild(dislikeIcon);
 
@@ -163,7 +192,6 @@ export default class extends AbstractView {
   async getHtml() {
     const isAuthorized = Boolean(this.user.id);
     return `
-        <main class="main-content">
             <div class="post-container">
                 <div class="post-details">
                     <h3 id="post-title"></h3>
@@ -175,12 +203,24 @@ export default class extends AbstractView {
                         <p id="post-data"></p>
                     </div>
                     <div class="post-actions">
-                        <button class="btn post-like" id="post-like">
-                            <i class="fa fa-thumbs-up fa-lg" id="post-like-inner" aria-hidden="true"></i>
-                        </button>
-                        <button class="btn post-dislike" id="post-dislike">
-                            <i class="fa fa-thumbs-down fa-lg" id="post-dislike-inner" aria-hidden="true"></i>
-                        </button>
+                    <button class="btn post-like" id="post-like">
+                    <svg xlmns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="post-stats-icon">
+                      <path
+                        d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        />
+                    </svg>
+                    </button>
+                    <button class="btn post-dislike" id="post-dislike">
+                      <svg xlmns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="post-stats-icon">
+                          <path 
+                            d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zM17 2h3a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-3"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                          />
+                      </svg>
+                    </button>
                     </div>
                 </div>
             </div>
@@ -208,7 +248,6 @@ export default class extends AbstractView {
             <div id="comments" class="comments-container">
                 <!-- Comments will be dynamically populated here -->
             </div>
-        </main>
         `;
   }
 

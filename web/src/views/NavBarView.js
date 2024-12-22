@@ -1,5 +1,6 @@
 import AbstractView from "./AbstractView.js";
 import Utils from "../pkg/Utils.js";
+import fetcher from "../pkg/fetcher.js";
 
 export default class extends AbstractView {
   constructor(params, user) {
@@ -12,13 +13,6 @@ export default class extends AbstractView {
     return `
         <div class="logo">Forum App</div>
 
-        <div class="navbar-search">
-            <input
-                type="text"
-                placeholder="Search posts, topics..."
-                class="search-input"
-            />
-        </div>
 
         <div id="nav-auth-links" class="${isAuthorized ? "hidden" : ""}">
             <button id="login-btn" class="btn login">Login</button>
@@ -33,9 +27,9 @@ export default class extends AbstractView {
   }
 
   async init() {
-    const isAuthorized = Boolean(this.user.id);
+    const isAuthorized = await fetcher.checkToken();
 
-    if (isAuthorized) {
+    if (isAuthorized?.checker) {
       // User-specific buttons
       document
         .getElementById("create-post-btn")
@@ -45,7 +39,6 @@ export default class extends AbstractView {
 
       document.getElementById("logout-btn")?.addEventListener("click", () => {
         Utils.logOut();
-        window.location.reload();
       });
     } else {
       // Login/Register buttons

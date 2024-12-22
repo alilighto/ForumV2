@@ -15,8 +15,7 @@ const signIn = async (email, password) => {
     showErr.innerHTML = data.msg;
     return;
   }
-
-  localStorage.setItem("token", data.token);
+  
   const payload = Utils.parseJwt(data.token);
   localStorage.setItem("id", payload.id);
   localStorage.setItem("role", redirect.roles.user);
@@ -31,7 +30,6 @@ export default class extends AbstractView {
 
   async getHtml() {
     return `
-        <main class="auth-container">
             <div class="auth-wrapper">
                 <form id="sign-in-form" class="auth-form">
                     <h2 class="form-title">Sign In</h2>
@@ -72,7 +70,6 @@ export default class extends AbstractView {
                     <div id="showError" class="error-message"></div>
                 </form>
             </div>
-        </main>
         `;
   }
 
