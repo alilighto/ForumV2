@@ -67,7 +67,6 @@ const getPost = async (postID) => {
 };
 
 const votePost = async (postID, likeType) => {
-  console.log("postid", postID);
   const path = "/api/post/vote";
   const body = {
     post_id: parseInt(postID),
@@ -128,7 +127,7 @@ const drawComments = (comment) => {
   likeIcon.setAttribute("fill", "none");
   likeIcon.setAttribute("stroke", "currentColor");
   likeIcon.setAttribute("stroke-width", "2");
-  likeIcon.classList.add("post-stats-icon");
+  likeIcon.classList.add("comment-stats-icon");
   likeIcon.innerHTML = `
       <path
         d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"
@@ -147,7 +146,7 @@ const drawComments = (comment) => {
   dislikeIcon.setAttribute("fill", "none");
   dislikeIcon.setAttribute("stroke", "currentColor");
   dislikeIcon.setAttribute("stroke-width", "2");
-  dislikeIcon.classList.add("post-stats-icon");
+  dislikeIcon.classList.add("comment-stats-icon");
   dislikeIcon.innerHTML = `
   <path 
     d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zM17 2h3a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-3"
@@ -159,13 +158,39 @@ const drawComments = (comment) => {
   likeButton.className = "btn comment-like";
   likeButton.id = "comment-like";
   likeIcon.innerText = comment.likes;
+
+  let likeCount = document.createElement("p");
+  likeCount.className = "comment-like-count";
+  likeCount.innerText = comment.likes;
+
   likeButton.appendChild(likeIcon);
+  likeButton.appendChild(likeCount);
 
   let dislikeButton = document.createElement("button");
   dislikeButton.className = "btn comment-dislike";
   dislikeButton.id = "comment-dislike";
   dislikeIcon.innerText = comment.dislikes;
+
+  let dislikeCount = document.createElement("p");
+  dislikeCount.className = "comment-dislike-count";
+  dislikeCount.innerText = comment.dislikes;
+
   dislikeButton.appendChild(dislikeIcon);
+  dislikeButton.appendChild(dislikeCount);
+
+  if (comment?.vote_status == 1) {
+    if (likeButton) {
+      likeButton.classList.add("active");
+      dislikeButton.classList.remove("active");
+    }
+  }
+
+  if (comment?.vote_status == 2) {
+    if (dislikeButton) {
+      dislikeButton.classList.add("active");
+      likeButton.classList.remove("active");
+    }
+  }
 
   const votes = document.createElement("div");
   votes.appendChild(likeButton);

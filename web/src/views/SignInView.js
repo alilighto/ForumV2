@@ -15,7 +15,7 @@ const signIn = async (email, password) => {
     showErr.innerHTML = data.msg;
     return;
   }
-  
+
   const payload = Utils.parseJwt(data.token);
   localStorage.setItem("id", payload.id);
   localStorage.setItem("role", redirect.roles.user);
@@ -65,6 +65,10 @@ export default class extends AbstractView {
                             Don't have an account? 
                             <a href="/sign-up" data-link>Sign Up</a>
                         </p>
+                        <p>
+                            Go Home
+                            <a href="/" data-link>Sign Up</a>
+                        </p>
                     </div>
 
                     <div id="showError" class="error-message"></div>
@@ -88,7 +92,7 @@ export default class extends AbstractView {
           "Please enter both email and password";
         return;
       }
-        
+
       await signIn(email, password);
     });
 

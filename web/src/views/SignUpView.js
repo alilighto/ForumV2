@@ -91,6 +91,10 @@ export default class extends AbstractView {
                             Already have an account? 
                             <a href="/sign-in" data-link>Sign In</a>
                         </p>
+                        <p>
+                            Go Home
+                            <a href="/" data-link>Sign Up</a>
+                        </p>
                     </div>
 
                     <div id="showError" class="error-message"></div>

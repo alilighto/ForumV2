@@ -98,24 +98,32 @@ const router = async () => {
     return;
   }
 
-  if (match.route.view === Home) {
+  if (
+    match.route.view === Home ||
+    match.route.view === Post ||
+    match.route.view === CreatePost
+  ) {
     // Load Navbar
     const NavBarView = new NavBar(null, user);
     document.querySelector("#navbar").innerHTML = await NavBarView.getHtml();
     NavBarView.init();
 
-    // Load Sidebar
-    const SideBarView = new SideBar(null, user);
-    let sudeBarHtml = await SideBarView.getHtml();
-
     view.addStyle("navbar");
-    view.addStyle("sidebar");
     view.addStyle("main-content");
     view.addStyle("post-card");
 
+    // Load Sidebar
+    let sideBarHtml = "";
+    if (match.route.view === Home) {
+      view.addStyle("sidebar");
+
+      const SideBarView = new SideBar(null, user);
+      sideBarHtml = await SideBarView.getHtml();
+      SideBarView.init();
+    }
+
     document.querySelector("#app").innerHTML =
-      sudeBarHtml + (await view.getHtml());
-    SideBarView.init();
+      sideBarHtml + (await view.getHtml());
   } else {
     // Clear navbar and sidebar if not HomeView
     document.querySelector("#navbar").innerHTML = "";

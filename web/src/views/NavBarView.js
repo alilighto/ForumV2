@@ -11,7 +11,7 @@ export default class extends AbstractView {
   async getHtml() {
     const isAuthorized = Boolean(this.user.id);
     return `
-        <div class="logo">Forum App</div>
+        <div class="logo" id="logo">Forum App</div>
 
 
         <div id="nav-auth-links" class="${isAuthorized ? "hidden" : ""}">
@@ -19,8 +19,11 @@ export default class extends AbstractView {
             <button id="register-btn" class="btn register">Register</button>
         </div>
         <div id="nav-user-links" class="${isAuthorized ? "" : "hidden"}">
-            <span id="username-display">${this.user.username || "User"}</span>
-            <button id="create-post-btn" class="btn create">Create Post</button>
+            ${
+              location.pathname !== "/create-post"
+                ? '<button id="create-post-btn" class="btn create">Create Post</button>'
+                : ""
+            }
             <button id="logout-btn" class="btn logout">Logout</button>
         </div>
         `;
@@ -28,6 +31,10 @@ export default class extends AbstractView {
 
   async init() {
     const isAuthorized = await fetcher.checkToken();
+
+    document.getElementById("logo")?.addEventListener("click", () => {
+      window.location.href = "/";
+    });
 
     if (isAuthorized?.checker) {
       // User-specific buttons
