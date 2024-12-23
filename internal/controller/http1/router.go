@@ -43,9 +43,9 @@ func (h *Handler) InitRoutes(conf *config.Conf) *http.ServeMux {
 			w.Write([]byte(err.Error()))
 			return
 		}
-		if r.URL.Path != "/" {
-			w.WriteHeader(http.StatusNotFound)
-		}
+		// if r.URL.Path != "/" {
+		// 	w.WriteHeader(http.StatusNotFound)
+		// }
 		if err = tmpl.Execute(w, fmt.Sprintf("%v:%v", conf.API.Host, conf.API.Port)); err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte(err.Error()))

@@ -95,7 +95,7 @@ LIMIT $3 OFFSET $4;
 	}
 
 	if len(posts) == 0 {
-		return nil, http.StatusNotFound, fmt.Errorf("no posts found for category: %s", categoryName)
+		return nil, http.StatusNoContent, fmt.Errorf("no posts found for category: %s", categoryName)
 	}
 
 	return posts, http.StatusOK, nil
