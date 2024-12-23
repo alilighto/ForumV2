@@ -1,4 +1,5 @@
 import fetcher from "../pkg/fetcher.js";
+import Utils from "../pkg/Utils.js";
 import AbstractView from "./AbstractView.js";
 
 const getPostPath = "/api/post/";
@@ -10,6 +11,7 @@ let dislikeListenerSet = false; // Flag to track dislike button listener
 const getPost = async (postID) => {
   const post = await fetcher.get(getPostPath + postID);
   if (post && post.msg != undefined) {
+    Utils.showError(post.status, post.msg);
     return;
   }
   if (post) {

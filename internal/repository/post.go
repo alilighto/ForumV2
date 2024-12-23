@@ -95,7 +95,7 @@ LIMIT $3 OFFSET $4;
 	}
 
 	if len(posts) == 0 {
-		return nil, http.StatusNotFound, fmt.Errorf("no posts found for category: %s", categoryName)
+		return nil, http.StatusNoContent, fmt.Errorf("no posts found for category: %s", categoryName)
 	}
 
 	return posts, http.StatusOK, nil
@@ -236,6 +236,7 @@ func (r *PostRepository) GetPostByID(ctx context.Context, postID uint) (entity.P
 	if err := prep.QueryRowContext(ctx, userId, postID).Scan(&post.PostID, &post.UserID, &post.Title, &post.Data, &post.UserName, &post.Likes, &post.Dislikes, &post.VoteStatus); err != nil {
 		return post, http.StatusNotFound, err
 	}
+
 	Categorys, status, err := r.getCategorysByPostID(ctx, postID)
 	if err != nil {
 		return post, status, err

@@ -80,8 +80,8 @@ export default class extends AbstractView {
     signInForm.addEventListener("submit", async (e) => {
       e.preventDefault(); // Prevent default form submission
 
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
+      const email = document.getElementById("email")?.value;
+      const password = document.getElementById("password")?.value;
 
       // Validate inputs
       if (!email || !password) {
@@ -93,28 +93,26 @@ export default class extends AbstractView {
       await signIn(email, password);
     });
 
-    // Optional: Add client-side validation
     const emailInput = document.getElementById("email");
     const passwordInput = document.getElementById("password");
+    let showErr = document.getElementById("showError");
 
     emailInput.addEventListener("input", () => {
       // Basic email validation
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(emailInput.value)) {
-        emailInput.setCustomValidity("Please enter a valid email address");
+        showErr.innerHTML = "Please enter a valid email address";
       } else {
-        emailInput.setCustomValidity("");
+        showErr.innerHTML = "";
       }
     });
 
     passwordInput.addEventListener("input", () => {
       // Basic password validation
       if (passwordInput.value.length < 6) {
-        passwordInput.setCustomValidity(
-          "Password must be at least 6 characters long"
-        );
+        showErr.innerHTML = "Password must be at least 6 characters long";
       } else {
-        passwordInput.setCustomValidity("");
+        showErr.innerHTML = "";
       }
     });
   }

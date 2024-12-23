@@ -107,3 +107,5 @@ Link: 🌐 http://0.0.0.0:8080
 Link: 🌐 http://0.0.0.0:8080
 2024/12/23 16:46:53 2024/12/23 16:46:53 HTTP/1.1 [GET]	0.0.0.0:8080/api/posts/General?limit=20&offset=120 - 404 - Not Found
 2024/12/23 16:46:53 no posts found for category: General
+2024/12/23 17:23:40 [32mServer is running...🚀
+Link: 🌐 http://0.0.0.0:8080
