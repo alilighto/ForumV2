@@ -19,8 +19,14 @@ func (h *Handler) getALLPosts(w http.ResponseWriter, r *http.Request) {
 	limitStr := r.URL.Query().Get("limit")
 	offsetStr := r.URL.Query().Get("offset")
 
-	limit, _ := strconv.Atoi(limitStr)
-	offset, _ := strconv.Atoi(offsetStr)
+	limit, err := strconv.Atoi(limitStr)
+	if err != nil {
+		h.errorHandler(w, r, http.StatusBadRequest, "Invalid limit")
+	}
+	offset, err:= strconv.Atoi(offsetStr) 
+	if err != nil {
+		h.errorHandler(w, r, http.StatusBadRequest, "Invalid offset")
+	}
 
 	posts, status, err := h.service.Post.GetAllByCategory(r.Context(), category, limit, offset)
 	if err != nil {

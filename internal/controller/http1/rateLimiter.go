@@ -10,7 +10,7 @@ import (
 type RateLimiter struct {
 	Requests int           // Maximum number of requests allowed
 	Interval time.Duration // Time frame for the rate limit
-	mu       sync.Mutex    // Mutex for concurrent access
+	sync.Mutex    // Mutex for concurrent access
 	clients  map[string]*clientInfo
 }
 
@@ -23,14 +23,13 @@ func NewRateLimiter(requests int, interval time.Duration) *RateLimiter {
 	return &RateLimiter{
 		Requests: requests,
 		Interval: interval,
+		Mutex: sync.Mutex{},
 		clients:  make(map[string]*clientInfo),
 	}
 }
 
 func (rl *RateLimiter) Limiter(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		rl.mu.Lock()
-		defer rl.mu.Unlock()
 
 		clientIP := r.RemoteAddr // You can also use user ID if available
 		info, exists := rl.clients[clientIP]
@@ -40,7 +39,9 @@ func (rl *RateLimiter) Limiter(next http.Handler) http.Handler {
 				requestCount: 0,
 				firstRequest: time.Now(),
 			}
+			rl.Lock()
 			rl.clients[clientIP] = info
+			rl.Unlock()
 		}
 
 		// Check if the time interval has passed
