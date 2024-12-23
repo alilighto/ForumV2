@@ -1,3 +1,1 @@
-Search about why we should seperate sql quuery's in diferent files (migrations)
-Search about jwt secret (seed, hashing, crypto)
-What is the meaning of "Bearer"  in JWT token
+make the select categores with checkBtn

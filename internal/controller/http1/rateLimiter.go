@@ -56,7 +56,7 @@ func (rl *RateLimiter) Limiter(next http.Handler) http.Handler {
 		if info.requestCount > rl.Requests {
 			e := errorResponse{
 				Status: http.StatusTooManyRequests,
-				Msg:    "Ha ha ha ha ha ha h",
+				Msg:    "Ha ha ha, you're going too fast!",
 			}
 			w.WriteHeader(e.Status)
 			if err := json.NewEncoder(w).Encode(e); err != nil {

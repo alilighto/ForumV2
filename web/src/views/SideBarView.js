@@ -37,6 +37,11 @@ export default class extends AbstractView {
             )
             .join("")}
         </div>
+        <div class="togel-sidbar">
+          <button id="togel-sidbar" class="togel-sidbar">
+          <span> Filter by catigores <img src="/src/assets/img/settings-sliders.svg" alt="filter"></span>
+          </button>
+        </div>
       </div>
     `;
 
@@ -45,7 +50,6 @@ export default class extends AbstractView {
 
   async init() {
     const sidebarItems = document.querySelectorAll(".sidebar-menu-item");
-
     sidebarItems.forEach((item) => {
       item.addEventListener("click", (e) => {
         const category = e.target.getAttribute("data-category");
@@ -69,5 +73,32 @@ export default class extends AbstractView {
         document.dispatchEvent(event);
       });
     });
+
+    // Toggle sidebar
+    const check = document.querySelector("#togel-sidbar");
+    if (check) {
+      check.addEventListener("click", () => {
+        const sidebarSection = document.querySelectorAll(".sidebar-section");
+        sidebarSection.forEach((item) => {
+          switch (item.style.display) {
+            case "block":
+              item.style.display = "none";
+              break;
+            case "none":
+              item.style.display = "block";
+              break;
+            default:
+              item.style.display = "block";
+          }
+          // on resize
+          window.addEventListener("resize", () => {
+            if (window.innerWidth > 768) {
+              item.style.display = "block";
+            }
+          }
+          );
+        });
+      });
+    }
   }
 }

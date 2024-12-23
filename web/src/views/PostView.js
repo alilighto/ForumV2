@@ -235,6 +235,7 @@ export default class extends AbstractView {
   async getHtml() {
     const isAuthorized = Boolean(this.user.id);
     return `
+    
             <div class="post-container">
                 <div class="post-details">
                     <h3 id="post-title"></h3>
