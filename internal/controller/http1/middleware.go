@@ -8,6 +8,11 @@ import (
 	smpljwt "forum/pkg/smplJwt"
 )
 
+type key string 
+const (
+	IDKey key = "id"
+	TokenKey key = "token"
+)
 
 func (h *Handler) corsMiddleWare(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -57,27 +62,27 @@ func (h *Handler) identify(role uint, next http.HandlerFunc) http.HandlerFunc {
 				h.errorHandler(w, r, http.StatusUnauthorized, "invalid token")
 				return
 			}
-			r = r.WithContext(context.WithValue(r.Context(), "id", id))
-			r = r.WithContext(context.WithValue(r.Context(), "token", cookie.Value))
+			r = r.WithContext(context.WithValue(r.Context(), IDKey, id))
+			r = r.WithContext(context.WithValue(r.Context(), TokenKey, cookie.Value))
 			next(w, r)
 			return
 		}
 
 		cookie, err := r.Cookie("token")
 		if err != nil {
-			r = r.WithContext(context.WithValue(r.Context(), "id", 0))
+			r = r.WithContext(context.WithValue(r.Context(), IDKey, 0))
 			next(w, r)
 			return
 		}
 
 		id, err := smpljwt.ParseToken(cookie.Value, h.secret)
 		if err != nil {
-			r = r.WithContext(context.WithValue(r.Context(), "id", 0))
+			r = r.WithContext(context.WithValue(r.Context(), IDKey, 0))
 			next(w, r)
 			return
 		}
-		r = r.WithContext(context.WithValue(r.Context(), "id", id))
-		r = r.WithContext(context.WithValue(r.Context(), "token", cookie.Value))
+		r = r.WithContext(context.WithValue(r.Context(), IDKey, id))
+		r = r.WithContext(context.WithValue(r.Context(), TokenKey, cookie.Value))
 		next(w, r)
 	}
 }
