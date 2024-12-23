@@ -236,6 +236,7 @@ func (r *PostRepository) GetPostByID(ctx context.Context, postID uint) (entity.P
 	if err := prep.QueryRowContext(ctx, userId, postID).Scan(&post.PostID, &post.UserID, &post.Title, &post.Data, &post.UserName, &post.Likes, &post.Dislikes, &post.VoteStatus); err != nil {
 		return post, http.StatusNotFound, err
 	}
+
 	Categorys, status, err := r.getCategorysByPostID(ctx, postID)
 	if err != nil {
 		return post, status, err

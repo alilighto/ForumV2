@@ -79,7 +79,7 @@ const router = async () => {
     (potentialMatches) => potentialMatches.result !== null
   );
   if (!match) {
-    Utils.showError(404);
+    Utils.showError(404, "The page you requested does not exist");
     return;
   }
 

@@ -13,7 +13,7 @@ const getPostsByCategory = async (category) => {
   );
   const postsDoc = document.querySelector(".posts-grid");
 
-  if (posts && posts?.status == "404" && offset > 0) {
+  if (posts && posts?.status == "400" && offset > 0) {
     ended = true;
     return;
   }
@@ -30,6 +30,10 @@ const getPostsByCategory = async (category) => {
     }
     offset += 20;
   } else {
+    if (offset > 0) {
+      ended = true;
+      return;
+    }
     postsDoc.innerHTML = "<p>No posts</p>"; // Display "No posts" message
   }
 };
@@ -46,7 +50,6 @@ const newPostElement = (post) => {
   const authorName = document.createElement("div");
   authorName.classList.add("post-author-name");
   authorName.textContent = post.username;
-
 
   headerContent.appendChild(authorName);
   postCardHeader.appendChild(headerContent);
@@ -273,7 +276,7 @@ const updatePostInList = async (postId) => {
 };
 
 const getUserPosts = async (userID) => {
-  const path = `/api/profile/posts/${userID}?limit=10&offset=${offset}`;
+  const path = `/api/profile/posts/${userID}?limit=${limit}&offset=${offset}`;
   const posts = await fetcher.get(path);
 
   if (posts && posts?.status == "404" && offset > 0) {
@@ -295,12 +298,16 @@ const getUserPosts = async (userID) => {
     }
     offset += 10;
   } else {
+    if (offset > 0) {
+      ended = true;
+      return;
+    }
     postsDoc.innerHTML = "<p>No posts</p>"; // Display "No posts" message
   }
 };
 
 const getUserLikedPosts = async (userID) => {
-  const path = `/api/profile/liked-posts/${userID}?limit=10&offset=${offset}`;
+  const path = `/api/profile/liked-posts/${userID}?limit=${limit}&offset=${offset}`;
   const posts = await fetcher.get(path);
 
   if (posts && posts?.status == "404" && offset > 0) {
@@ -322,12 +329,16 @@ const getUserLikedPosts = async (userID) => {
     }
     offset += 10;
   } else {
+    if (offset > 0) {
+      ended = true;
+      return;
+    }
     postsDoc.innerHTML = "<p>No posts</p>"; // Display "No posts" message
   }
 };
 
 const getUserDislikedPosts = async (userID) => {
-  const path = `/api/profile/disliked-posts/${userID}?limit=10&offset=${offset}`;
+  const path = `/api/profile/disliked-posts/${userID}?limit=${limit}&offset=${offset}`;
   const posts = await fetcher.get(path);
 
   if (posts && posts?.status == "404" && offset > 0) {
@@ -349,13 +360,16 @@ const getUserDislikedPosts = async (userID) => {
     }
     offset += 10;
   } else {
+    if (offset > 0) {
+      ended = true;
+      return;
+    }
     postsDoc.innerHTML = "<p>No posts</p>"; // Display "No posts" message
-    ended = true;
   }
 };
 
 let isThrottled = false;
-let timeout;
+let category = "General";
 
 async function handleScroll() {
   if (ended) {
@@ -370,13 +384,21 @@ async function handleScroll() {
 
   isThrottled = true;
 
-  timeout = setTimeout(async () => {
+  setTimeout(async () => {
     if (window.scrollY + window.innerHeight >= document.body.offsetHeight) {
       console.log("Reached the bottom of the page.");
       // Load more posts
-      await getPostsByCategory("General");
+      const user = Utils.getUser();
+      if (category === "my-posts") {
+        await getUserPosts(user.id); // Fetch user's created posts
+      } else if (category === "liked-posts") {
+        await getUserLikedPosts(user.id); // Fetch user's liked posts
+      } else if (category === "disliked-posts") {
+        await getUserDislikedPosts(user.id); // Fetch user's disliked posts
+      } else {
+        await getPostsByCategory(category); // Fetch posts by category
+      }
     }
-
     isThrottled = false;
   }, 200);
 }
@@ -405,20 +427,23 @@ export default class extends AbstractView {
     const user = Utils.getUser();
 
     document.addEventListener("category-selected", async (e) => {
-      const category = e.detail.category;
+      const category_choosed = e.detail.category;
+
       offset = 0;
       const postsDoc = document.querySelector(".posts-grid");
       postsDoc.textContent = ""; // Clear previous posts
 
-      if (category === "my-posts") {
+      if (category_choosed === "my-posts") {
         await getUserPosts(user.id); // Fetch user's created posts
-      } else if (category === "liked-posts") {
+      } else if (category_choosed === "liked-posts") {
         await getUserLikedPosts(user.id); // Fetch user's liked posts
-      } else if (category === "disliked-posts") {
+      } else if (category_choosed === "disliked-posts") {
         await getUserDislikedPosts(user.id); // Fetch user's disliked posts
       } else {
-        await getPostsByCategory(category); // Fetch posts by category
+        await getPostsByCategory(category_choosed); // Fetch posts by category
       }
+
+      category = category_choosed;
     });
   }
 }

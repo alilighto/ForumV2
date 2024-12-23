@@ -9,7 +9,8 @@ const fetcher = {
     return makeRequest(path, body, "POST");
   },
   checkToken: async () => {
-    const url = `http://${API_HOST_NAME}/api/is-valid`;
+    //http://${API_HOST_NAME}
+    const url = `/api/is-valid`;
     const options = {
       mode: "cors",
       method: "GET",
@@ -37,7 +38,8 @@ const fetcher = {
 };
 
 const makeRequest = async (path, body, method) => {
-  const url = `http://${API_HOST_NAME}${path}`;
+  //http://${API_HOST_NAME}
+  const url = `${path}`;
   const options = {
     mode: "cors",
     method: method,
@@ -63,7 +65,7 @@ const makeRequest = async (path, body, method) => {
     return responseBody;
   }
   if (response.status == 404) {
-    return { status: 404 };
+    return { status: 404, msg: "" };
   }
   if (response.status == 400) {
     return responseBody;
