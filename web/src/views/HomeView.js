@@ -374,7 +374,8 @@ let category = "General";
 async function handleScroll() {
   if (ended) {
     console.log("No more posts to load. Removing scroll listener.");
-    window.removeEventListener("scroll", handleScroll); // Remove the event listener
+    const postsContainer = document.getElementById("posts");
+    postsContainer?.removeEventListener("scroll", handleScroll); // Remove the event listener
     return;
   }
 
@@ -424,7 +425,8 @@ export default class extends AbstractView {
     await getPostsByCategory("General");
 
     // add scroll event listener
-    window.addEventListener("scroll", handleScroll);
+    const postsContainer = document.getElementById("posts");
+    postsContainer?.addEventListener("scroll", handleScroll);
 
     const user = Utils.getUser();
 
