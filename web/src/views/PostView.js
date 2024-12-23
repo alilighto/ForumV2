@@ -195,6 +195,7 @@ const drawComments = (comment) => {
   }
 
   const votes = document.createElement("div");
+  votes.classList.add("comment-votes");
   votes.appendChild(likeButton);
   votes.appendChild(dislikeButton);
 
@@ -207,8 +208,6 @@ const drawComments = (comment) => {
 
   el.append(authorEl);
   el.append(body);
-  const hr = document.createElement("hr");
-  el.append(hr);
   el.append(votes);
   return el;
 };

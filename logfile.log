@@ -13,7 +13,7 @@ Link: 🌐 http://0.0.0.0:8787
 2024/12/23 12:50:05 [32mServer is running...🚀
 Link: 🌐 http://0.0.0.0:8787
 2024/12/23 12:50:33 [32mServer is running...🚀
-Link: 🌐 http://0.0.0.0:3000
+Link: 🌐 http://0.0.0.0:3000logfile.log
 2024/12/23 12:52:45 [32mServer is running...🚀
 Link: 🌐 http://0.0.0.0:9000
 2024/12/23 13:00:35 [32mServer is running...🚀
@@ -60,7 +60,7 @@ Link: 🌐 http://0.0.0.0:3300
 2024/12/23 15:27:23 2024/12/23 15:27:23 HTTP/1.1 [POST]	0.0.0.0:3300/api/signout - 401 - Unauthorized
 2024/12/23 15:27:23 no token cookie
 2024/12/23 15:35:09 [32mServer is running...🚀
-Link: 🌐 http://0.0.0.0:3300
+Link: 🌐 http://0.0.logfile.log0.0:3300
 2024/12/23 15:39:32 [32mServer is running...🚀
 Link: 🌐 http://0.0.0.0:3400
 2024/12/23 15:40:38 2024/12/23 15:40:38 HTTP/1.1 [GET]	0.0.0.0:3400/api/posts/Programming%20Languages?limit=20&offset=0 - 404 - Not Found
@@ -109,3 +109,25 @@ Link: 🌐 http://0.0.0.0:8080
 2024/12/23 16:46:53 no posts found for category: General
 2024/12/23 17:23:40 [32mServer is running...🚀
 Link: 🌐 http://0.0.0.0:8080
+2024/12/23 17:27:05 [32mServer is running...🚀
+Link: 🌐 http://0.0.0.0:8080
+2024/12/23 17:45:10 [32mServer is running...🚀
+Link: 🌐 http://0.0.0.0:8080
+2024/12/23 18:14:32 [32mServer is running...🚀
+Link: 🌐 http://0.0.0.0:8090
+2024/12/23 18:16:00 2024/12/23 18:16:00 HTTP/1.1 [POST]	0.0.0.0:8090/api/signin - 400 - Bad Request
+2024/12/23 18:16:00 invalid password
+2024/12/23 18:17:28 2024/12/23 18:17:28 HTTP/1.1 [POST]	0.0.0.0:8090/api/signin - 400 - Bad Request
+2024/12/23 18:17:28 invalid password
+2024/12/23 18:18:56 2024/12/23 18:18:56 HTTP/1.1 [POST]	0.0.0.0:8090/api/signin - 400 - Bad Request
+2024/12/23 18:18:56 invalid password
+2024/12/23 18:34:24 [32mServer is running...🚀
+Link: 🌐 http://0.0.0.0:9090
+2024/12/23 18:35:35 2024/12/23 18:35:35 HTTP/1.1 [POST]	0.0.0.0:9090/api/signin - 400 - Bad Request
+2024/12/23 18:35:35 invalid email or password
+2024/12/23 18:35:43 2024/12/23 18:35:43 HTTP/1.1 [POST]	0.0.0.0:9090/api/signin - 400 - Bad Request
+2024/12/23 18:35:43 invalid email or password
+2024/12/23 18:35:52 2024/12/23 18:35:52 HTTP/1.1 [POST]	0.0.0.0:9090/api/signin - 400 - Bad Request
+2024/12/23 18:35:52 invalid email or password
+2024/12/23 18:53:32 [32mServer is running...🚀
+Link: 🌐 http://0.0.0.0:3030

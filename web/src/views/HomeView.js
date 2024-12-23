@@ -79,7 +79,7 @@ const newPostElement = (post) => {
 
   // Post Actions
   const postActions = document.createElement("div");
-  postActions.classList.add("post-actions");
+  postActions.classList.add("post-card-actions");
 
   const postStats = document.createElement("div");
   postStats.classList.add("post-stats");

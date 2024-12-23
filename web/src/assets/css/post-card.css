@@ -39,7 +39,7 @@
   color: var(--text-secondary);
 }
 
-.post-actions {
+.post-card-actions {
   display: flex;
   justify-content: space-between;
   align-items: center;
