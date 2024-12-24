@@ -71,6 +71,3 @@ func (s *UserService) SignIn(ctx context.Context, user entity.User) (string, int
 	return token, http.StatusOK, nil
 }
 
-func (s *UserService) GetUserByID(ctx context.Context, userID uint) (entity.User, int, error) {
-	return s.userRepo.GetUserByID(ctx, userID)
-}

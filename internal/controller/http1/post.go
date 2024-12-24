@@ -2,10 +2,8 @@ package http1
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strconv"
-	"strings"
 
 	"forum/internal/entity"
 )
@@ -23,7 +21,7 @@ func (h *Handler) getALLPosts(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		h.errorHandler(w, r, http.StatusBadRequest, "Invalid limit")
 	}
-	offset, err:= strconv.Atoi(offsetStr) 
+	offset, err := strconv.Atoi(offsetStr)
 	if err != nil {
 		h.errorHandler(w, r, http.StatusBadRequest, "Invalid offset")
 	}
@@ -89,25 +87,6 @@ func (h *Handler) createPost(w http.ResponseWriter, r *http.Request) {
 		h.errorHandler(w, r, http.StatusInternalServerError, err.Error())
 		return
 	}
-}
-
-func (h *Handler) deletePost(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodDelete {
-		h.errorHandler(w, r, http.StatusMethodNotAllowed, "not allowed method")
-		return
-	}
-	strPostID := strings.TrimPrefix(r.URL.Path, "/api/post/delete/")
-	postID, err := strconv.ParseUint(strPostID, 10, 64)
-	if err != nil {
-		h.errorHandler(w, r, http.StatusNotFound, fmt.Sprintf("Invalid id: %v", postID))
-		return
-	}
-	userID := r.Context().Value("id").(int)
-	if userID < 0 {
-		h.errorHandler(w, r, http.StatusUnauthorized, "invalid id")
-		return
-	}
-	h.service.Post.DeletePostByID(r.Context(), uint(postID), uint(userID))
 }
 
 func (h *Handler) votePost(w http.ResponseWriter, r *http.Request) {

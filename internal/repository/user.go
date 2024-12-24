@@ -43,17 +43,3 @@ func (r *UserRepository) GetUserIDByEmail(ctx context.Context, email string) (en
 	}
 	return user, http.StatusOK, nil
 }
-
-func (r *UserRepository) GetUserByID(ctx context.Context, userID uint) (entity.User, int, error) {
-	user := entity.User{}
-	query := `SELECT username, email FROM users WHERE id = $1 LIMIT 1;`
-	prep, err := r.db.PrepareContext(ctx, query)
-	if err != nil {
-		return user, http.StatusInternalServerError, err
-	}
-	defer prep.Close()
-	if err = prep.QueryRowContext(ctx, userID).Scan(&user.Username, &user.Email); err != nil {
-		return user, http.StatusNotFound, err
-	}
-	return user, http.StatusOK, nil
-}

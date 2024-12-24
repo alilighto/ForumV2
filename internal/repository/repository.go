@@ -10,7 +10,7 @@ import (
 type User interface {
 	Create(ctx context.Context, user entity.User) (int, error)
 	GetUserIDByEmail(ctx context.Context, email string) (entity.User, int, error)
-	GetUserByID(ctx context.Context, userID uint) (entity.User, int, error)
+	// GetUserByID(ctx context.Context, userID uint) (entity.User, int, error)
 }
 
 type Session interface {
@@ -40,7 +40,6 @@ type Category interface {
 
 type Comment interface {
 	CreateComment(ctx context.Context, input entity.Comment) (int, error)
-	DeleteComment(ctx context.Context, commentID uint, userID uint) (int, error)
 	UpsertCommentVote(ctx context.Context, input entity.CommentVote) (int, error)
 }
 

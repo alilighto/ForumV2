@@ -78,11 +78,6 @@ func (h *Handler) createRoutes() []Route {
 			Role:    entity.Roles.User,
 		},
 		{
-			Path:    "/api/profile/",
-			Handler: h.profile,
-			Role:    entity.Roles.User,
-		},
-		{
 			Path:    "/api/profile/posts/",
 			Handler: h.getAllPostsByUserID,
 			Role:    entity.Roles.User,
@@ -118,11 +113,6 @@ func (h *Handler) createRoutes() []Route {
 			Role:    entity.Roles.User,
 		},
 		{
-			Path:    "/api/post/delete/",
-			Handler: h.deletePost,
-			Role:    entity.Roles.User,
-		},
-		{
 			Path:    "/api/comment/create",
 			Handler: h.createComment,
 			Role:    entity.Roles.User,
@@ -130,11 +120,6 @@ func (h *Handler) createRoutes() []Route {
 		{
 			Path:    "/api/comment/vote",
 			Handler: h.voteComment,
-			Role:    entity.Roles.User,
-		},
-		{
-			Path:    "/api/comment/delete/",
-			Handler: h.deleteComment,
 			Role:    entity.Roles.User,
 		},
 		{

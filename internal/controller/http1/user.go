@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"strconv"
 	"time"
 
 	"forum/internal/entity"
@@ -58,32 +57,6 @@ func (h *Handler) signIn(w http.ResponseWriter, r *http.Request) {
 	if err := json.NewEncoder(w).Encode(map[string]interface{}{
 		"token": token,
 	}); err != nil {
-		h.errorHandler(w, r, http.StatusInternalServerError, err.Error())
-		return
-	}
-}
-
-func (h *Handler) profile(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		h.errorHandler(w, r, http.StatusMethodNotAllowed, "not allowed method")
-		return
-	}
-	strUserID := r.URL.Path[len("/api/profile/"):]
-	userID, err := strconv.Atoi(strUserID)
-	if err != nil {
-		h.errorHandler(w, r, http.StatusNotFound, "not found")
-		return
-	}
-	if userID < 0 {
-		h.errorHandler(w, r, http.StatusNotFound, "not found")
-		return
-	}
-	user, status, err := h.service.User.GetUserByID(r.Context(), uint(userID))
-	if err != nil {
-		h.errorHandler(w, r, status, err.Error())
-		return
-	}
-	if err := json.NewEncoder(w).Encode(user); err != nil {
 		h.errorHandler(w, r, http.StatusInternalServerError, err.Error())
 		return
 	}

@@ -10,7 +10,6 @@ import (
 type User interface {
 	Create(ctx context.Context, user entity.User) (int, error)
 	SignIn(ctx context.Context, user entity.User) (string, int, error)
-	GetUserByID(ctx context.Context, userID uint) (entity.User, int, error)
 }
 
 type Session interface {
@@ -21,7 +20,6 @@ type Session interface {
 
 type Post interface {
 	CreatePost(ctx context.Context, input entity.Post) (uint, int, error)
-	DeletePostByID(ctx context.Context, postID uint, userID uint) (int, error)
 	UpsertPostVote(ctx context.Context, input entity.PostVote) (int, error)
 	GetPostByID(ctx context.Context, postID uint) (entity.Post, int, error)
 	GetAllByCategory(ctx context.Context, tagName string, limit, offset int) ([]entity.Post, int, error)
@@ -35,7 +33,6 @@ type Category interface {
 
 type Comment interface {
 	CreateComment(ctx context.Context, input entity.Comment) (int, error)
-	DeleteComment(ctx context.Context, commentID uint, userID uint) (int, error)
 	UpsertCommentVote(ctx context.Context, input entity.CommentVote) (int, error)
 }
 

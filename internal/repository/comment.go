@@ -28,18 +28,6 @@ func (r *CommentRepository) CreateComment(ctx context.Context, input entity.Comm
 	return http.StatusOK, nil
 }
 
-func (r *CommentRepository) DeleteComment(ctx context.Context, commentID uint, userID uint) (int, error) {
-	query := `DELETE FROM comment WHERE id = $1 AND user_id = $2`
-	prep, err := r.db.PrepareContext(ctx, query)
-	if err != nil {
-		return http.StatusInternalServerError, err
-	}
-	defer prep.Close()
-	if _, err := prep.ExecContext(ctx, commentID, userID); err != nil {
-		return http.StatusBadRequest, err
-	}
-	return http.StatusOK, nil
-}
 
 func (r *CommentRepository) UpsertCommentVote(ctx context.Context, input entity.CommentVote) (int, error) {
 	query := "SELECT vote FROM comment_vote WHERE user_id = $1 and comment_id = $2;"

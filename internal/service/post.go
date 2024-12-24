@@ -73,9 +73,6 @@ func (s *PostService) GetPostByID(ctx context.Context, postID uint) (entity.Post
 	return s.postRepo.GetPostByID(ctx, postID)
 }
 
-func (s *PostService) DeletePostByID(ctx context.Context, postID uint, userID uint) (int, error) {
-	return s.postRepo.DeletePostByID(ctx, postID, userID)
-}
 
 func (s *PostService) UpsertPostVote(ctx context.Context, input entity.PostVote) (int, error) {
 	if input.Vote != 0 && input.Vote != 1 {

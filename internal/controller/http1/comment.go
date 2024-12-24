@@ -2,11 +2,9 @@ package http1
 
 import (
 	"encoding/json"
-	"fmt"
-	"forum/internal/entity"
 	"net/http"
-	"strconv"
-	"strings"
+
+	"forum/internal/entity"
 )
 
 func (h *Handler) createComment(w http.ResponseWriter, r *http.Request) {
@@ -49,30 +47,6 @@ func (h *Handler) voteComment(w http.ResponseWriter, r *http.Request) {
 	}
 	input.UserID = uint(userID)
 	if status, err := h.service.Comment.UpsertCommentVote(r.Context(), input); err != nil {
-		h.errorHandler(w, r, status, err.Error())
-		return
-	}
-	w.WriteHeader(http.StatusOK)
-}
-
-func (h *Handler) deleteComment(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodDelete {
-		h.errorHandler(w, r, http.StatusMethodNotAllowed, "not allowed method")
-		return
-	}
-	userID := r.Context().Value("id").(int)
-	if userID < 0 {
-		h.errorHandler(w, r, http.StatusUnauthorized, "invalid id")
-		return
-	}
-	strCommentID := strings.TrimPrefix(r.URL.Path, "/api/comment/delete/")
-	CommentID, err := strconv.ParseUint(strCommentID, 10, 64)
-	if err != nil {
-		h.errorHandler(w, r, http.StatusNotFound, fmt.Sprintf("Invalid id: %v", CommentID))
-		return
-	}
-
-	if status, err := h.service.Comment.DeleteComment(r.Context(), uint(CommentID), uint(userID)); err != nil {
 		h.errorHandler(w, r, status, err.Error())
 		return
 	}

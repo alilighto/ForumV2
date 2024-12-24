@@ -26,9 +26,6 @@ func (s *CommentService) CreateComment(ctx context.Context, input entity.Comment
 	return s.commentRepo.CreateComment(ctx, input)
 }
 
-func (s *CommentService) DeleteComment(ctx context.Context, commentID uint, userID uint) (int, error) {
-	return s.commentRepo.DeleteComment(ctx, commentID, userID)
-}
 func (s *CommentService) UpsertCommentVote(ctx context.Context, input entity.CommentVote) (int, error) {
 	if input.Vote != 0 && input.Vote != 1 {
 		return http.StatusBadRequest, errors.New("invalid vote")
